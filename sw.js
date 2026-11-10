@@ -1,5 +1,5 @@
 // Păstrează aplicația disponibilă offline; când există internet, aduce versiunea nouă în fundal.
-const CACHE = "grila-mm-v10";
+const CACHE = "grila-mm-v11";
 const FILES = ["./", "index.html", "style.css", "app.js", "exhibits.js", "questions.js", "cards.js", "reels.js", "story.js", "music.js", "feed.js", "manifest.webmanifest", "icon-192.png", "icon-512.png"];
 // `reload` ocolește cache-ul HTTP, ca o versiune nouă să nu pornească cu fișiere vechi.
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES.map(u => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting())); });

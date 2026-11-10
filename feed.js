@@ -246,8 +246,9 @@ function fdClozeAnswer(i, e, v) {
 /* Povestirea unei lecții, o idee pe rând */
 function fdHalt() { FD.tok++; clearTimeout(FD.timer); if (FD.au) FD.au.pause(); }
 function fdAudio(name) {
-  if (!FD.au) { FD.au = new Audio(); FD.au.preload = "auto"; }
+  if (!FD.au) { FD.au = new Audio(); FD.au.preload = "auto"; FD.au.defaultPlaybackRate = 1.1; }
   FD.au.src = `audio/${name}.mp3`;
+  FD.au.playbackRate = 1.1;
   const p = FD.au.play(); if (p) p.catch(() => {});
 }
 function fdVoiceNow() {
