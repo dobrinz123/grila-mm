@@ -365,21 +365,34 @@ function fdInit() {
   fdEl("fdSheet").addEventListener("click", ev => { const b = ev.target.closest("[data-sv]"); if (!b) return; FD.filter = b.dataset.sv; FD.sheet = false; fdSheet(); fdLabel(); fdReset(); });
   fdEl("fdVoice").addEventListener("click", () => {
     if (!window.speechSynthesis) { fdToast("Telefonul nu are voce"); return; }
-    if (FD.voice) { FD.voice = false; speechSynthesis.cancel(); fdEl("fdVoice").textContent = "🔇"; return; }
+    if (FD.voice) { FD.voice = false; speechSynthesis.cancel(); fdEl("fdVoice").textContent = "🔇"; fmDuck(false); return; }
     fdFindVoice();
     if (!FD.roVoice) { fdToast("N-am găsit voce în română pe telefon"); return; }
-    FD.voice = true; fdEl("fdVoice").textContent = "🔊";
+    FD.voice = true; fdEl("fdVoice").textContent = "🔊"; fmDuck(true);
     const e = FD.items[FD.cur]; if (e && e.it.k === "L") { e.rev = false; fdRun(FD.cur); }
   });
   if (window.speechSynthesis) { fdFindVoice(); speechSynthesis.onvoiceschanged = fdFindVoice; }
+  fdEl("fdMusic").addEventListener("click", ev => {
+    ev.stopPropagation();
+    const next = fmNextStyle();
+    if (next && !fmEnsure()) { fdToast("Telefonul nu poate reda muzica"); return; }
+    fmSet(next); S.music = next; save(); fdMusicBtn();
+    fdToast(next ? `Muzică: ${FM_STYLES[next].name}` : "Muzică oprită");
+  });
+  // După repornire, browserul cere o atingere înainte să permită sunetul.
+  if (S.music && FM_STYLES[S.music]) { FM.style = S.music; }
+  fdMusicBtn();
+  const unlock = () => { if (FD.on && FM.style && !FM.timer) fmRun(); };
+  document.addEventListener("click", unlock); document.addEventListener("touchend", unlock);
   addEventListener("keydown", ev => { if (!FD.on) return; if (ev.key === "ArrowDown" || ev.key === "j") { ev.preventDefault(); fdGo(1); } if (ev.key === "ArrowUp" || ev.key === "k") { ev.preventDefault(); fdGo(-1); } });
-  document.addEventListener("visibilitychange", () => { if (document.hidden && FD.on) fdHalt(); });
+  document.addEventListener("visibilitychange", () => { if (!FD.on) return; if (document.hidden) { fdHalt(); fmPause(); } else if (FM.style && FM.ctx) fmRun(); });
   fdLabel(); fdReset();
 }
 function fdShow() {
   fdEl("feed").hidden = false;
   fdInit();
-  if (!FD.on) { FD.on = true; fdBgSize(); if (FD.cur >= 0) fdBgFor(FD.cur); if (!fdStill()) { FDB.last = performance.now(); FDB.raf = requestAnimationFrame(fdBgLoop); } }
+  if (!FD.on) { FD.on = true; fdBgSize(); if (FD.cur >= 0) fdBgFor(FD.cur); if (!fdStill()) { FDB.last = performance.now(); FDB.raf = requestAnimationFrame(fdBgLoop); } if (FM.style && FM.ctx) fmRun(); }
   fdHud();
 }
-function fdHide() { if (!FD.on) { fdEl("feed").hidden = true; return; } FD.on = false; fdHalt(); fdEl("feed").hidden = true; }
+function fdHide() { if (!FD.on) { fdEl("feed").hidden = true; return; } FD.on = false; fdHalt(); fmPause(); fdEl("feed").hidden = true; }
+function fdMusicBtn() { const b = fdEl("fdMusic"); b.textContent = FM.style ? "🎶" : "🎵"; b.classList.toggle("off", !FM.style); }
