@@ -253,8 +253,9 @@ function fdAudio(name) {
 }
 function fdVoiceNow() {
   const e = FD.items[FD.cur]; if (!e) return;
-  if (e.it.k === "P") { const s = fdStages(e.it)[e.stage || 0]; if (s.t !== "w") fdAudio(`${e.it.id}-${e.stage || 0}`); }
-  else if (e.it.k === "K") fdAudio(`${e.it.id}-q`);
+  if (e.it.k !== "P") return;
+  const s = fdStages(e.it)[e.stage || 0];
+  if (s.t !== "w" && s.t !== "cl") fdAudio(`${e.it.id}-${e.stage || 0}`);
 }
 function fdSay(text, done) {
   const tok = FD.tok;
@@ -265,7 +266,6 @@ function fdRun(i) {
   fdHalt();
   const e = FD.items[i]; if (!e) return;
   if (e.it.k === "P") { fdPartShow(i, true); return; }
-  if (e.it.k === "K") { if (FD.voice) fdVoiceNow(); return; }
   if (e.it.k !== "L") return;
   const a = fdArt(i); if (!a) return;
   const bs = [...a.querySelectorAll(".bt")];
