@@ -1,6 +1,6 @@
 "use strict";
 // Feed vertical: un ecran, o idee. Se încarcă înainte de app.js; folosește S, Q, CD abia la rulare.
-const FD = { items: [], cur: -1, on: false, filter: "all", pi: 0, retry: [], voice: false, roVoice: null, tok: 0, timer: null, lastT: null, recent: [], ok: 0, tot: 0, ready: false, pool: null, lastTap: 0, io: null, seenThis: 0, sheet: false };
+const FD = { lastScroll: 0, items: [], cur: -1, on: false, filter: "all", pi: 0, retry: [], voice: false, roVoice: null, tok: 0, timer: null, lastT: null, recent: [], ok: 0, tot: 0, ready: false, pool: null, lastTap: 0, io: null, seenThis: 0, sheet: false };
 const FD_PATTERN = ["L", "L", "Q", "L", "T", "L", "S", "Q", "L", "C", "T"];
 const FD_WIN = ["W", "Ai gătit 🔥", "Aura +100", "Sigma move", "Curat", "Absolute cinema", "Locked in", "Prea ușor"];
 const FD_LOSE = ["L", "Cooked 💀", "Plot twist: nu", "Aura în minus", "Aproape, șefu'", "Skill issue, dar reparabil"];
@@ -78,6 +78,7 @@ function fdAppend(count) {
     FD.items.push({ it, ans: null, rev: false, opts: it.k === "Q" ? orderFor(it) : null });
     const a = document.createElement("article");
     a.className = "reel"; a.dataset.i = i;
+    a.style.background = FD_COLORS[i % FD_COLORS.length][0];
     box.appendChild(a);
     FD.io.observe(a);
   }
@@ -261,20 +262,27 @@ function fdClick(ev) {
 const FDB = { c: null, x: 0, w: 0, h: 0, mode: 0, col: FD_COLORS[0], t: 0, last: 0, raf: 0, pl: { y: 0, v: 0, a: 0 }, ob: [], ball: null, trail: [], blocks: [], score: 0 };
 const fdStill = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 function fdBgSize() {
-  const c = FDB.c, r = Math.min(devicePixelRatio || 1, 2);
-  FDB.w = c.clientWidth; FDB.h = c.clientHeight;
-  c.width = FDB.w * r; c.height = FDB.h * r; FDB.x.setTransform(r, 0, 0, r, 0, 0);
-  FDB.st = Math.max(96, Math.min(230, innerHeight * .24));
+  const c = FDB.c, W = fdEl("fdScroll").clientWidth, st = Math.max(96, Math.min(230, innerHeight * .24));
+  if (!W || (W === FDB.w && Math.abs(st - FDB.st) < 40)) return;
+  const r = Math.min(devicePixelRatio || 1, 1.5);
+  FDB.w = W; FDB.h = st; FDB.st = st;
+  fdEl("feed").style.setProperty("--st", st + "px");
+  c.width = W * r; c.height = st * r; FDB.x.setTransform(r, 0, 0, r, 0, 0);
   FDB.ball = null; FDB.blocks = []; FDB.ob = [];
 }
 function fdBgFor(i) {
   const e = FD.items[i]; if (!e) return;
   FDB.col = FD_COLORS[i % FD_COLORS.length];
   FDB.mode = i % 3;
-  FDB.c.parentElement.style.background = FDB.col[0];
-  FDB.c.classList.toggle("dim", e.it.k !== "L");
-  FDB.ball = null; FDB.trail = []; FDB.blocks = []; FDB.ob = [];
+  FDB.active = e.it.k === "L";
+  FDB.ball = null; FDB.trail = []; FDB.blocks = []; FDB.ob = []; FDB.pl.y = 0; FDB.pl.v = 0; FDB.pl.a = 0;
+  FDB.c.classList.remove("show");
+  if (!FDB.active) return;
+  const a = fdArt(i); if (!a) return;
+  a.appendChild(FDB.c);
+  FDB.x.clearRect(0, 0, FDB.w, FDB.h);
   if (fdStill()) fdBgDraw(0);
+  setTimeout(() => { if (FDB.active && FDB.c.parentElement === a) FDB.c.classList.add("show"); }, 40);
 }
 function fdRunner(dt) {
   const x = FDB.x, W = FDB.w, H = FDB.h, g = H - 34, P = FDB.pl, c = FDB.col[1], jump = Math.sqrt(2 * 1750 * Math.max(46, FDB.st - 76));
@@ -329,6 +337,7 @@ function fdBgLoop(ts) {
   if (!FD.on) { FDB.raf = 0; return; }
   FDB.raf = requestAnimationFrame(fdBgLoop);
   if (ts - FDB.last < 30 || document.hidden) return;
+  if (!FDB.active || performance.now() - FD.lastScroll < 140) { FDB.last = ts; return; }
   const dt = Math.min(.05, (ts - FDB.last) / 1000); FDB.last = ts;
   fdBgDraw(dt);
 }
@@ -356,11 +365,12 @@ function fdFindVoice() {
 function fdInit() {
   if (FD.ready) return; FD.ready = true;
   fdBuild();
-  FDB.c = fdEl("fdBg"); FDB.x = FDB.c.getContext("2d"); fdBgSize();
+  FDB.c = fdEl("fdBg"); FDB.x = FDB.c.getContext("2d"); FDB.w = 0; FDB.st = 0; fdBgSize();
   addEventListener("resize", () => { if (FD.on) fdBgSize(); });
   const box = fdEl("fdScroll");
   FD.io = new IntersectionObserver(es => { es.forEach(en => { if (en.isIntersecting && en.intersectionRatio > .6) fdActivate(+en.target.dataset.i); }); }, { root: box, threshold: [.6] });
   box.addEventListener("click", fdClick);
+  box.addEventListener("scroll", () => { FD.lastScroll = performance.now(); }, { passive: true });
   fdEl("fdFilter").addEventListener("click", () => { FD.sheet = !FD.sheet; fdSheet(); });
   fdEl("fdSheet").addEventListener("click", ev => { const b = ev.target.closest("[data-sv]"); if (!b) return; FD.filter = b.dataset.sv; FD.sheet = false; fdSheet(); fdLabel(); fdReset(); });
   fdEl("fdVoice").addEventListener("click", () => {

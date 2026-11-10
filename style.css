@@ -150,14 +150,13 @@ body.feedmode { overflow: hidden; }
 body.feedmode #nav { background: #000; border-top-color: #222; }
 body.feedmode #nav a { color: #9a9a9a; }
 body.feedmode #nav a.on { color: #fff; }
-#feed { position: fixed; inset: 0 0 calc(55px + env(safe-area-inset-bottom, 0px)); overflow: hidden; color: #fff; color-scheme: dark; background: #000; font-family: var(--body); }
+#feed { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; position: fixed; inset: 0 0 calc(55px + env(safe-area-inset-bottom, 0px)); overflow: hidden; color: #fff; color-scheme: dark; background: #000; font-family: var(--body); }
 #feed[hidden] { display: none; }
-.fbgwrap { position: absolute; inset: 0; transition: background .25s; }
-#fdBg { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity .2s; }
-#fdBg.dim { opacity: .14; }
+#fdBg { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: var(--st, 150px); opacity: 0; pointer-events: none; z-index: 1; transition: opacity .18s; }
+#fdBg.show { opacity: 1; }
 #fdScroll { position: absolute; inset: 0; overflow-y: auto; scroll-snap-type: y mandatory; overscroll-behavior: contain; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
 #fdScroll::-webkit-scrollbar { display: none; }
-.reel { position: relative; height: 100%; scroll-snap-align: start; scroll-snap-stop: always; overflow: hidden; --rc: #c86bff; }
+.reel { touch-action: pan-y; position: relative; height: 100%; scroll-snap-align: start; scroll-snap-stop: always; overflow: hidden; --rc: #c86bff; }
 .reel.shake .rmid, .reel.shake .rq { animation: fdshake .4s; }
 @keyframes fdshake { 20% { transform: translateX(-10px); } 40% { transform: translateX(9px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(4px); } }
 .hud { position: absolute; z-index: 6; inset: 0 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 8px; pointer-events: none; padding-block: calc(10px + env(safe-area-inset-top, 0px)) 6px; padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); }
@@ -174,23 +173,22 @@ body.feedmode #nav a.on { color: #fff; }
 .scs { display: flex; flex-wrap: wrap; gap: 7px; }
 .sc { min-height: 40px; padding: 7px 13px; border-radius: 20px; background: #222; border: 1px solid #3a3a3a; color: #fff; font-size: .9rem; }
 .sc.on { background: #fff; color: #000; font-weight: 600; }
-#fdToast { position: absolute; z-index: 8; left: 0; right: 0; top: 38%; text-align: center; font: 800 2.1rem var(--display); color: #fff; text-shadow: 0 3px 0 #000, 0 0 22px rgba(0,0,0,.8); opacity: 0; pointer-events: none; }
+#fdToast { position: absolute; z-index: 8; left: 0; right: 0; top: 38%; text-align: center; font: 800 2.1rem var(--display); color: #fff; text-shadow: 0 3px 0 #000; opacity: 0; pointer-events: none; }
 #fdToast.show { animation: fdtoast 1.3s ease; }
 @keyframes fdtoast { 0% { opacity: 0; transform: scale(.5); } 15% { opacity: 1; transform: scale(1.12); } 75% { opacity: 1; transform: scale(1); } 100% { opacity: 0; } }
 .rmid { position: absolute; inset: calc(60px + env(safe-area-inset-top, 0px)) 62px 0 0; padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-bottom: 12px; display: flex; flex-direction: column; justify-content: flex-start; gap: 12px; overflow-y: auto; }
-.reel[data-k="L"] .rmid { bottom: clamp(96px, 24vh, 230px); }
+.reel[data-k="L"] .rmid { bottom: var(--st, 150px); }
 .rmid, .rq { scrollbar-width: none; }
 .rmid::-webkit-scrollbar, .rq::-webkit-scrollbar { display: none; }
 .reel[data-k="L"] .rmid, .reel[data-k="T"] .rmid, .reel[data-k="C"] .rmid, .reel[data-k="S"] .rmid, .reel[data-k="M"] .rmid { right: 18px; padding-right: 0; }
 .reel[data-k="T"] .rmid, .reel[data-k="C"] .rmid, .reel[data-k="S"] .rmid, .reel[data-k="M"] .rmid { justify-content: center; }
 .rtag { align-self: flex-start; font: 600 .72rem var(--mono); letter-spacing: .05em; text-transform: uppercase; color: #000; background: var(--rc); padding: 3px 8px; border-radius: 4px; }
 .rkick { font: 600 .95rem var(--mono); color: var(--rc); }
-.rhook { font: 800 clamp(1.5rem, min(8vw, 4.5vh), 2.5rem)/1.06 var(--display); letter-spacing: -.02em; text-shadow: 0 2px 0 #000, 0 0 14px rgba(0,0,0,.55); }
+.rhook { font: 800 clamp(1.5rem, min(8vw, 4.5vh), 2.5rem)/1.06 var(--display); letter-spacing: -.02em; }
 .rhook.sm { font-size: clamp(1.32rem, 6.3vw, 1.85rem); line-height: 1.14; }
-.reel.now .rhook { animation: fdhook .32s cubic-bezier(.2,1.5,.5,1); }
 @keyframes fdhook { from { transform: scale(.82); opacity: 0; } to { transform: none; opacity: 1; } }
 .rbeats { display: flex; flex-direction: column; gap: 9px; min-height: 0; }
-.bt { font: 600 clamp(.96rem, min(4.6vw, 2.6vh), 1.3rem)/1.24 var(--body); opacity: 0; transform: translateY(8px) scale(.96); color: rgba(255,255,255,.72); text-shadow: 0 1px 0 #000, 0 0 10px rgba(0,0,0,.7); }
+.bt { font: 600 clamp(.96rem, min(4.6vw, 2.6vh), 1.3rem)/1.24 var(--body); opacity: 0; transform: translateY(8px) scale(.96); color: rgba(255,255,255,.78); }
 .bt.on { opacity: 1; transform: none; transition: transform .16s cubic-bezier(.2,1.6,.5,1), opacity .12s; }
 .bt.cur { color: #fff; }
 .bt mark { background: none; color: var(--rc); font-weight: 700; }
@@ -239,7 +237,7 @@ body.feedmode #nav a.on { color: #fff; }
 .burst { position: absolute; left: 50%; top: 46%; z-index: 5; pointer-events: none; }
 .burst i { position: absolute; left: 0; top: 0; font-size: 1.6rem; font-style: normal; animation: fdfly .95s var(--d) ease-out both; }
 @keyframes fdfly { from { transform: translate(-50%, 0) scale(.4); opacity: 1; } to { transform: translate(var(--x), var(--y)) scale(1.2) rotate(40deg); opacity: 0; } }
-.bw { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; font: 800 3rem var(--display); text-shadow: 0 4px 0 #000, 0 0 26px rgba(0,0,0,.8); animation: fdpop 1s ease both; }
+.bw { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; font: 800 3rem var(--display); text-shadow: 0 4px 0 #000; animation: fdpop 1s ease both; }
 .bw.w { color: #5df2a0; }
 .bw.l { color: #ff8a7a; }
 @keyframes fdpop { 0% { transform: translate(-50%, -50%) scale(.3); opacity: 0; } 18% { transform: translate(-50%, -50%) scale(1.25); opacity: 1; } 70% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -80%) scale(1); } }
