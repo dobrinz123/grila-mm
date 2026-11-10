@@ -19,16 +19,29 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<section id="feed" hidden>
+  <div class="fbgwrap"><canvas id="fdBg"></canvas></div>
+  <div id="fdScroll"></div>
+  <header class="hud">
+    <button id="fdFilter" class="hb">Pentru tine ▾</button>
+    <div class="hr"><span id="fdCombo" class="hs">🔥 0</span><span id="fdXp" class="hs">✨ 0</span><button id="fdVoice" class="hb ic" aria-label="Pornește sau oprește vocea">🔇</button></div>
+  </header>
+  <div id="fdSheet" hidden></div>
+  <div id="fdToast"></div>
+</section>
 <main id="app"></main>
 <nav id="nav" aria-label="Secțiuni">
+  <a href="#feed" data-r="feed"><span class="g">▶</span>Feed</a>
   <a href="#panou" data-r="panou"><span class="g">◧</span>Panou</a>
-  <a href="#flash" data-r="flash"><span class="g">❏</span>Flashcarduri</a>
+  <a href="#flash" data-r="flash"><span class="g">❏</span>Carduri</a>
   <a href="#grile" data-r="grile"><span class="g">☑</span>Grile</a>
   <a href="#simulare" data-r="simulare"><span class="g">◷</span>Simulare</a>
 </nav>
 <script src="exhibits.js"></script>
 <script src="questions.js"></script>
 <script src="cards.js"></script>
+<script src="reels.js"></script>
+<script src="feed.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

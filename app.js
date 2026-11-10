@@ -326,12 +326,16 @@ function viewResults() {
 }
 
 /* Rutare și acțiuni */
-function route() { const h = location.hash.slice(1); return ["panou", "flash", "grile", "simulare"].includes(h) ? h : "panou"; }
+function route() { const h = location.hash.slice(1); return ["feed", "panou", "flash", "grile", "simulare"].includes(h) ? h : "feed"; }
 function render() {
   const r = route();
   const inExam = r === "simulare" && !!S.ex;
   document.body.classList.toggle("exam", inExam);
   document.querySelectorAll("#nav a").forEach(a => a.classList.toggle("on", a.dataset.r === r));
+  document.body.classList.toggle("feedmode", r === "feed");
+  app.hidden = r === "feed";
+  if (r === "feed") { fdShow(); return; }
+  fdHide();
   if (r === "panou") viewHome();
   else if (r === "flash") viewFlash();
   else if (r === "grile") viewPractice();
@@ -393,4 +397,9 @@ window.addEventListener("hashchange", () => { render(); toTop(); });
 if (S.ex) { if (timeLeft() <= 0) finishExam(); else startTick(); }
 render();
 connectSync();
-if (!window.claude && "serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
+if (!window.claude && "serviceWorker" in navigator && location.protocol === "https:") {
+  const hadWorker = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => { if (hadWorker && !reloaded) { reloaded = true; location.reload(); } });
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
