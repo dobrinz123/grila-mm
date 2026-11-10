@@ -1,6 +1,6 @@
 "use strict";
 // Feed vertical: un ecran, o idee. Se încarcă înainte de app.js; folosește S, Q, CD abia la rulare.
-const FD = { lastScroll: 0, items: [], cur: -1, on: false, filter: "story", si: 0, ended: false, pi: 0, retry: [], voice: false, roVoice: null, tok: 0, timer: null, lastT: null, recent: [], ok: 0, tot: 0, ready: false, pool: null, lastTap: 0, io: null, seenThis: 0, sheet: false };
+const FD = { lastScroll: 0, items: [], cur: -1, on: false, filter: "story", si: 0, ended: false, pi: 0, retry: [], voice: false, au: null, tok: 0, timer: null, lastT: null, recent: [], ok: 0, tot: 0, ready: false, pool: null, lastTap: 0, io: null, seenThis: 0, sheet: false };
 const FD_PATTERN = ["L", "L", "Q", "L", "T", "L", "S", "Q", "L", "C", "T"];
 const FD_WIN = ["W", "Ai gătit 🔥", "Aura +100", "Sigma move", "Curat", "Absolute cinema", "Locked in", "Prea ușor"];
 const FD_LOSE = ["L", "Cooked 💀", "Plot twist: nu", "Aura în minus", "Aproape, șefu'", "Skill issue, dar reparabil"];
@@ -226,7 +226,7 @@ function fdPartShow(i, speak) {
   body.innerHTML = h; body.classList.remove("in"); void body.offsetWidth; body.classList.add("in");
   if (hint) hint.textContent = s.t === "cl" && e.cl === undefined ? "Alege varianta corectă" : s.t === "n" ? "Atinge sau dă swipe la următoarea parte" : "Atinge: înainte · marginea stângă: înapoi";
   if (s.t === "w") fdWidgetLive(a, e);
-  if (speak && i === FD.cur) { fdHalt(); if (FD.voice && say) fdSay(say, () => {}); }
+  if (speak && i === FD.cur) { fdHalt(); if (FD.voice) fdVoiceNow(); }
 }
 function fdPartStep(i, d) {
   const e = FD.items[i], list = fdStages(e.it), cur = e.stage || 0, s = list[cur];
@@ -244,24 +244,27 @@ function fdClozeAnswer(i, e, v) {
 }
 
 /* Povestirea unei lecții, o idee pe rând */
-function fdHalt() { FD.tok++; clearTimeout(FD.timer); if (window.speechSynthesis) speechSynthesis.cancel(); }
+function fdHalt() { FD.tok++; clearTimeout(FD.timer); if (FD.au) FD.au.pause(); }
+function fdAudio(name) {
+  if (!FD.au) { FD.au = new Audio(); FD.au.preload = "auto"; }
+  FD.au.src = `audio/${name}.mp3`;
+  const p = FD.au.play(); if (p) p.catch(() => {});
+}
+function fdVoiceNow() {
+  const e = FD.items[FD.cur]; if (!e) return;
+  if (e.it.k === "P") { const s = fdStages(e.it)[e.stage || 0]; if (s.t !== "w") fdAudio(`${e.it.id}-${e.stage || 0}`); }
+  else if (e.it.k === "K") fdAudio(`${e.it.id}-q`);
+}
 function fdSay(text, done) {
   const tok = FD.tok;
   const fin = () => { if (tok === FD.tok) { clearTimeout(FD.timer); done(); } };
-  if (FD.voice && FD.roVoice) {
-    const u = new SpeechSynthesisUtterance(fdPlain(text));
-    u.voice = FD.roVoice; u.lang = FD.roVoice.lang; u.rate = .86; u.pitch = 1;
-    u.onend = fin; u.onerror = fin;
-    FD.timer = setTimeout(fin, 3500 + text.length * 170);
-    speechSynthesis.speak(u);
-  } else {
-    FD.timer = setTimeout(fin, Math.max(1050, text.length * 46));
-  }
+  FD.timer = setTimeout(fin, Math.max(1050, text.length * 46));
 }
 function fdRun(i) {
   fdHalt();
   const e = FD.items[i]; if (!e) return;
   if (e.it.k === "P") { fdPartShow(i, true); return; }
+  if (e.it.k === "K") { if (FD.voice) fdVoiceNow(); return; }
   if (e.it.k !== "L") return;
   const a = fdArt(i); if (!a) return;
   const bs = [...a.querySelectorAll(".bt")];
@@ -475,13 +478,6 @@ function fdSheet() {
   box.innerHTML = `<h3>Serialul, de la zero</h3><p class="rsub">Ai ajuns în Episodul ${cur.ep}. Atinge un episod ca să sari la el.</p><div class="scs">${chip("story", "▶ Continuă serialul")}<button class="sc" data-ep="0">↺ De la început</button></div><div class="scs">${EPISODES.map((x, i) => `<button class="sc ${cur.ep === x.n ? "cur" : ""}" data-ep="${i}">${x.n}. ${x.title}</button>`).join("")}</div><h3>Recapitulare</h3><p class="rsub">Lecții scurte amestecate, pentru când știi deja materia.</p><div class="scs">${chip("all", "🔀 Mix")}${chip("saved", "❤️ Salvate")}${Object.keys(TOPICS).map(t => chip(t, TOPICS[t])).join("")}</div>`;
 }
 function fdLabel() { fdEl("fdFilter").textContent = (FD.filter === "story" ? "Serial" : FD.filter === "all" ? "Mix" : FD.filter === "saved" ? "Salvate" : TOPICS[FD.filter]) + " ▾"; }
-function fdFindVoice() {
-  if (!window.speechSynthesis) return null;
-  const v = speechSynthesis.getVoices().filter(o => /^ro/i.test(o.lang));
-  const rank = o => /natural|neural|premium|enhanced|online/i.test(o.name) ? 0 : /google/i.test(o.name) ? 1 : 2;
-  FD.roVoice = v.slice().sort((a, b) => rank(a) - rank(b))[0] || null;
-  return FD.roVoice;
-}
 function fdInit() {
   if (FD.ready) return; FD.ready = true;
   fdBuild();
@@ -498,15 +494,15 @@ function fdInit() {
     if (ep) { const st = fdState(); st.pos = EPISODES[+ep.dataset.ep].start; save(); FD.filter = "story"; FD.sheet = false; fdSheet(); fdLabel(); fdReset(); return; }
     const b = ev.target.closest("[data-sv]"); if (!b) return; FD.filter = b.dataset.sv; FD.sheet = false; fdSheet(); fdLabel(); fdReset();
   });
+  const voiceBtn = () => { fdEl("fdVoice").textContent = FD.voice ? "🔊" : "🔇"; };
   fdEl("fdVoice").addEventListener("click", () => {
-    if (!window.speechSynthesis) { fdToast("Telefonul nu are voce"); return; }
-    if (FD.voice) { FD.voice = false; speechSynthesis.cancel(); fdEl("fdVoice").textContent = "🔇"; fmDuck(false); return; }
-    fdFindVoice();
-    if (!FD.roVoice) { fdToast("N-am găsit voce în română pe telefon"); return; }
-    FD.voice = true; fdEl("fdVoice").textContent = "🔊"; fmDuck(true);
-    const e = FD.items[FD.cur]; if (e && e.it.k === "L") { e.rev = false; fdRun(FD.cur); }
+    FD.voice = !FD.voice; S.voice = FD.voice; save(); voiceBtn(); fmDuck(FD.voice);
+    if (!FD.voice) { fdHalt(); return; }
+    if (FD.filter !== "story") { fdToast("Vocea citește serialul"); return; }
+    fdVoiceNow();
   });
-  if (window.speechSynthesis) { fdFindVoice(); speechSynthesis.onvoiceschanged = fdFindVoice; }
+  if (S.voice) { FD.voice = true; fmDuck(true); }
+  voiceBtn();
   fdEl("fdMusic").addEventListener("click", ev => {
     ev.stopPropagation();
     if (!FM.on && !fmEnsure()) { fdToast("Telefonul nu poate reda muzica"); return; }
