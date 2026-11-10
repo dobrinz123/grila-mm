@@ -109,7 +109,7 @@ function fdFill(i) {
     h = `<div class="rq">${fdTag(it.t)}${it.x ? `<div class="rx">${exhibit(it.x)}</div>` : ""}<h2 class="qtx">${it.q}</h2>${e.opts.map((ai, n) => `<button class="ro" data-fa="q" data-v="${ai}"><b>${LET[n]}</b><span>${it.a[ai]}</span></button>`).join("")}<div class="fb"></div></div>`;
   } else if (it.k === "M") {
     const st = fdState();
-    h = `<div class="rmid"><p class="rkick">Check-up rapid</p><h2 class="rhook">${FD.seenThis} reels. Fără să observi.</h2><p class="rstat">${FD.ok}/${FD.tot} corecte azi · ✨ ${st.xp} aură</p><a class="rcta" href="#simulare">Încearcă o simulare</a><p class="rsub">sau dă swipe mai departe</p></div>`;
+    h = `<div class="rmid"><p class="rkick">Check-up rapid</p><h2 class="rhook">${FD.seenThis} reels. Fără să observi.</h2><p class="rstat">${FD.ok}/${FD.tot} corecte azi · ✨ ${st.xp} aură</p><p class="rstat">Lecții văzute: ${REELS.filter(r => st.seen[r.id]).length}/${REELS.length}</p><a class="rcta" href="#simulare">Încearcă o simulare</a><p class="rsub">sau dă swipe mai departe</p></div>`;
   }
   a.innerHTML = h + fdRail(e);
   if (e.ans !== null) fdPaint(a, e);
@@ -344,7 +344,7 @@ function fdReset() {
 function fdSheet() {
   const box = fdEl("fdSheet"); box.hidden = !FD.sheet; if (!FD.sheet) return;
   const chip = (v, l) => `<button class="sc ${FD.filter === v ? "on" : ""}" data-sv="${v}">${l}</button>`;
-  box.innerHTML = `<h3>Ce vrei să vezi?</h3><div class="scs">${chip("all", "🔥 Pentru tine")}${chip("saved", "❤️ Salvate")}${Object.keys(TOPICS).map(t => chip(t, TOPICS[t])).join("")}</div>`;
+  box.innerHTML = `<h3>Ce vrei să vezi?</h3><p class="rsub">Lecții văzute: ${REELS.filter(r => fdState().seen[r.id]).length}/${REELS.length}. Lecțiile nevăzute apar primele.</p><div class="scs">${chip("all", "🔥 Pentru tine")}${chip("saved", "❤️ Salvate")}${Object.keys(TOPICS).map(t => chip(t, TOPICS[t])).join("")}</div>`;
 }
 function fdLabel() { fdEl("fdFilter").textContent = (FD.filter === "all" ? "Pentru tine" : FD.filter === "saved" ? "Salvate" : TOPICS[FD.filter]) + " ▾"; }
 function fdFindVoice() {
