@@ -102,10 +102,8 @@ function fdFill(i) {
   a.style.setProperty("--rc", col);
   let h = "";
   if (it.k === "P") {
-    const ep = EPISODES[it.ep - 1], parts = STORY.filter(s => s.k === "P").length;
-    const head = `<div class="sth"><b>PART ${it.part}</b><span>din ${parts} · Episodul ${it.ep}: ${ep.title}</span></div>`;
-    const beats = `<div class="rbeats">${it.b.map(b => `<p class="bt">${fdMark(b)}</p>`).join("")}${it.v ? `<p class="bt sv">${it.v}</p>` : ""}${it.m ? `<p class="bt memo next">Part ${it.part + 1}: ${it.m}</p>` : ""}</div>`;
-    h = it.x ? `<div class="rq sx">${head}<h2 class="qtx">${it.h}</h2><div class="rx">${exhibit(it.x)}</div>${beats}</div>` : `<div class="rmid">${head}<h2 class="rhook">${it.h}</h2>${beats}</div><div class="swipe">⌃ swipe</div>`;
+    const ep = EPISODES[it.ep - 1], parts = STORY.filter(s => s.k === "P").length, n = fdStages(it).length;
+    h = `<div class="stg ${it.x ? "x" : ""}"><div class="segs">${"<i></i>".repeat(n)}</div><div class="sth"><b>PART ${it.part}</b><span>din ${parts} · Episodul ${it.ep}: ${ep.title}</span></div>${it.x ? `<div class="rx">${exhibit(it.x)}</div>` : ""}<div class="stb"></div><div class="tap">Atinge: înainte · marginea stângă: înapoi</div></div>`;
   } else if (it.k === "K") {
     h = `<div class="rq"><div class="sth"><b>VERIFICARE</b><span>Episodul ${it.ep}: ${EPISODES[it.ep - 1].title}</span></div><h2 class="qtx">${it.q}</h2>${e.opts.map((ai, n) => `<button class="ro" data-fa="q" data-v="${ai}"><b>${LET[n]}</b><span>${it.a[ai]}</span></button>`).join("")}<div class="fb"></div></div>`;
   } else if (it.k === "E") {
@@ -129,7 +127,8 @@ function fdFill(i) {
   }
   a.innerHTML = h + fdRail(e);
   if (e.ans !== null) fdPaint(a, e);
-  if ((it.k === "L" || it.k === "P") && e.rev) a.querySelectorAll(".bt").forEach(b => b.classList.add("on"));
+  if (it.k === "P") fdPartShow(i, false);
+  if (it.k === "L" && e.rev) a.querySelectorAll(".bt").forEach(b => b.classList.add("on"));
 }
 function fdCardBtns() { return `<div class="two"><button class="tf no" data-fa="card" data-v="0">Nu știam</button><button class="tf yes" data-fa="card" data-v="2">Știam</button></div>`; }
 function fdEvict() { document.querySelectorAll(".reel[data-f]").forEach(a => { if (Math.abs(+a.dataset.i - FD.cur) > 5) { a.innerHTML = ""; delete a.dataset.f; } }); }
@@ -151,6 +150,99 @@ function fdSpssExplain(it) {
   return it.r.trim().startsWith("-") ? "Are minus: valorile mari ale uneia merg cu valorile mici ale celeilalte." : "Fără minus: valorile mari ale uneia merg cu valorile mari ale celeilalte.";
 }
 
+
+/* Serial: etapele unei părți */
+const FD_W = { "Valorile extreme": "out", "Tăria lui r": "r", "De ce depinde Sig.": "sig" };
+function fdTerms(it) {
+  const out = [];
+  it.b.forEach(b => { const re = /\*\*([^*]{3,26})\*\*/g; let m; while ((m = re.exec(b.replace(/\\\*/g, "")))) { const t = m[1].trim(); if (!/[\d=≈:.,]/.test(t) && t.split(" ").length <= 3) out.push({ t, b }); } });
+  return out;
+}
+// Completări alese manual: propoziția are sens singură, iar variantele greșite sunt plauzibile.
+const FD_CL = { "datele": ["variabila", "cazul"], "dummy": ["ordinale", "nominale"], "corelează": ["compun constructul", "au medii egale"], "validitatea": ["fidelitatea", "amplitudinea"], "distribuția": ["media", "variabila"], "Modul": ["Mediana", "Media"], "variabilitate": ["medie", "asociere"], "Abaterea standard": ["Amplitudinea", "Mediana"], "coincid": ["diferă mult", "sunt zero"], "asociate": ["egale", "independente"], "r negativ": ["r pozitiv", "r = 0"], "Teoretic": ["Simplu aleatoriu", "Sistematic"], "doar din întâmplare": ["din cauza unei terțe variabile", "pentru că relația este puternică"], "ambele": ["una singură", "niciuna"], "la întâmplare": ["din cauza vârstei", "prin tragere la sorți"], "accesul la educație": ["genul", "vârsta"], "bogăția țării": ["ciocolata", "numărul de magazine"], "cartierul": ["numărul de camere", "prețul"], "verigă intermediară": ["cauză comună", "corelație coincidentală"], "pe coloane": ["pe diagonală", "pe ultimul rând"], "cazuri": ["variabile", "factori"], "unui singur": ["fiecărui", "mai multor"], "Beta": ["R²", "Sig."], "Homofilie": ["Contagiune", "Centralitate"], "clasificare": ["demonstrație", "interpretare"] };
+function fdCloze(it) {
+  if (it.part < 2 || it.x) return null;
+  const prev = STORY.filter(s => s.k === "P" && s.part === it.part - 1)[0]; if (!prev || prev.ep !== it.ep) return null;
+  const ts = fdTerms(prev).filter(x => FD_CL[x.t] && !(x.t === "pe coloane" && /^Se citește/.test(x.b))); if (!ts.length) return null;
+  const c = ts[ts.length - 1], r = fmRng(it.idx + 5);
+  const opts = [c.t, ...FD_CL[c.t]].map(x => [r(), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  const text = c.b.replace(/\\\*/g, "").replace("**" + c.t + "**", "@@").replace(/\*\*/g, "").replace("@@", '<u class="blank">?</u>');
+  return { t: "cl", x: text, ok: c.t, opts, from: prev.part };
+}
+function fdStages(it) {
+  if (it._st) return it._st;
+  const s = [], cl = fdCloze(it);
+  if (cl) s.push(cl);
+  s.push({ t: "h", x: it.h });
+  it.b.forEach(b => s.push({ t: "b", x: b }));
+  if (it.v) s.push({ t: "v", x: it.v });
+  if (FD_W[it.h]) s.push({ t: "w", w: FD_W[it.h] });
+  if (it.m) s.push({ t: "n", x: it.m });
+  return (it._st = s);
+}
+function fdMed(a) { const v = a.slice().sort((x, y) => x - y), m = v.length >> 1; return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2; }
+function fdWidget(e, w) {
+  if (w === "out") {
+    const base = [21, 22, 22, 23, 24], v = e.wg ? base.concat(1000) : base, mean = v.reduce((x, y) => x + y, 0) / v.length;
+    return `<div class="wg"><p class="wgt">Atinge butonul și urmărește cele două numere.</p><p class="bigv">${v.join(" · ")}</p><div class="wgr"><div><small>Media</small><b>${fmt(mean)}</b></div><div><small>Mediana</small><b>${fmt(fdMed(v))}</b></div></div><button class="tf yes" data-fa="wout">${e.wg ? "Scoate valoarea 1000" : "Adaugă valoarea 1000"}</button></div>`;
+  }
+  if (w === "r") return `<div class="wg"><p class="wgt">Trage de buton. Urmărește cum se schimbă norul.</p><div class="wplot" data-w="r"></div><p class="wval" id="wrv"></p><input class="wr" id="wrR" type="range" min="-100" max="100" step="5" value="${e.wr === undefined ? 60 : e.wr}" data-wid="r" aria-label="Valoarea lui r"></div>`;
+  return `<div class="wg"><p class="wgt">Corelația rămâne r = −0,071. Mărește eșantionul.</p><p class="wval" id="wsv"></p><input class="wr" id="wrS" type="range" min="0" max="100" step="1" value="${e.ws === undefined ? 20 : e.ws}" data-wid="sig" aria-label="Mărimea eșantionului"></div>`;
+}
+function fdPhi(z) { const t = 1 / (1 + .2316419 * z), d = .3989423 * Math.exp(-z * z / 2); return 1 - d * t * (.3193815 + t * (-.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); }
+function fdWidgetLive(a, e) {
+  const sr = a.querySelector("#wrR"), ss = a.querySelector("#wrS");
+  if (sr) {
+    const r = +sr.value / 100; e.wr = +sr.value;
+    const g = fmRng(9), gauss = () => Math.sqrt(-2 * Math.log(1 - g())) * Math.cos(6.283 * g());
+    let d = "";
+    for (let n = 0; n < 45; n++) { const x = gauss(), y = r * x + Math.sqrt(1 - r * r) * gauss(); d += `<circle cx="${(100 + x * 36).toFixed(1)}" cy="${(55 - y * 19).toFixed(1)}" r="2.6" fill="var(--rc)"/>`; }
+    a.querySelector(".wplot").innerHTML = `<svg viewBox="0 0 200 110" role="img" aria-label="Nor de puncte">${d}</svg>`;
+    const m = Math.abs(r), w = m === 1 ? "perfectă" : m > .5 ? "puternică" : m >= .3 ? "moderată" : m >= .1 ? "slabă" : "aproape nulă";
+    a.querySelector("#wrv").innerHTML = `<b>r = ${fmt(r, 2)}</b> · ${r === 0 ? "fără legătură liniară" : (r > 0 ? "pozitivă" : "negativă") + ", " + w}`;
+  }
+  if (ss) {
+    e.ws = +ss.value;
+    const N = Math.round(20 * Math.pow(250, e.ws / 100)), r = .071, z = r * Math.sqrt(N - 2) / Math.sqrt(1 - r * r), p = 2 * (1 - fdPhi(z)), ok = p < .05;
+    a.querySelector("#wsv").innerHTML = `<b>N = ${N.toLocaleString("ro-RO")}</b><br>Sig. ${p < .001 ? "< 0,001" : "= " + fmt(p, 3)}<br><span class="${ok ? "gd" : "bd"}">${ok ? "semnificativă, dar tot slabă" : "nesemnificativă"}</span>`;
+  }
+}
+function fdPartShow(i, speak) {
+  const e = FD.items[i], a = fdArt(i); if (!a) return;
+  const list = fdStages(e.it); e.stage = Math.max(0, Math.min(e.stage || 0, list.length - 1));
+  const s = list[e.stage], body = a.querySelector(".stb"); if (!body) return;
+  a.querySelectorAll(".segs i").forEach((x, n) => x.classList.toggle("on", n <= e.stage));
+  const hint = a.querySelector(".tap"), part = e.it.part;
+  let h = "", say = "";
+  if (s.t === "h") { h = `<h2 class="rhook">${s.x}</h2>`; say = s.x; }
+  else if (s.t === "b") { h = `<p class="bigb">${fdMark(s.x)}</p>`; say = fdPlain(s.x); }
+  else if (s.t === "v") { h = `<p class="bigv">${s.x}</p>`; say = s.x; }
+  else if (s.t === "n") { h = `<p class="rkick">Urmează</p><h2 class="rhook">Part ${part + 1}</h2><p class="bigb">${s.x}</p>`; say = s.x; }
+  else if (s.t === "w") { h = fdWidget(e, s.w); }
+  else if (s.t === "cl") {
+    const done = e.cl !== undefined;
+    h = `<p class="rkick">Din Part ${s.from}: completează</p><p class="bigb">${done ? s.x.replace('<u class="blank">?</u>', `<mark>${s.ok}</mark>`) : s.x}</p><div class="cls">${s.opts.map(o => `<button class="ro cl ${done ? (o === s.ok ? "right" : o === e.cl ? "wrong" : "") : ""}" data-fa="cl" data-v="${o}" ${done ? "disabled" : ""}><span>${o}</span></button>`).join("")}</div>`;
+  }
+  body.innerHTML = h; body.classList.remove("in"); void body.offsetWidth; body.classList.add("in");
+  if (hint) hint.textContent = s.t === "cl" && e.cl === undefined ? "Alege varianta corectă" : s.t === "n" ? "Atinge sau dă swipe la următoarea parte" : "Atinge: înainte · marginea stângă: înapoi";
+  if (s.t === "w") fdWidgetLive(a, e);
+  if (speak && i === FD.cur) { fdHalt(); if (FD.voice && say) fdSay(say, () => {}); }
+}
+function fdPartStep(i, d) {
+  const e = FD.items[i], list = fdStages(e.it), cur = e.stage || 0, s = list[cur];
+  if (d > 0 && s.t === "cl" && e.cl === undefined) return;
+  if (d > 0 && cur >= list.length - 1) { fdGo(1); return; }
+  if (d < 0 && cur === 0) return;
+  e.stage = cur + d; fdPartShow(i, true);
+}
+function fdClozeAnswer(i, e, v) {
+  if (e.cl !== undefined) return;
+  const st = fdState(), s = fdStages(e.it)[e.stage || 0], good = v === s.ok;
+  e.cl = v; FD.tot++;
+  if (good) { FD.ok++; st.combo++; st.best = Math.max(st.best, st.combo); st.xp += 100 + Math.min(st.combo, 10) * 20; } else { st.combo = 0; st.xp = Math.max(0, st.xp - 25); }
+  save(); fdPartShow(i, false); fdBurst(fdArt(i), good, good ? fdAny(FD_WIN) : fdAny(FD_LOSE)); fdHud();
+}
+
 /* Povestirea unei lecții, o idee pe rând */
 function fdHalt() { FD.tok++; clearTimeout(FD.timer); if (window.speechSynthesis) speechSynthesis.cancel(); }
 function fdSay(text, done) {
@@ -158,18 +250,19 @@ function fdSay(text, done) {
   const fin = () => { if (tok === FD.tok) { clearTimeout(FD.timer); done(); } };
   if (FD.voice && FD.roVoice) {
     const u = new SpeechSynthesisUtterance(fdPlain(text));
-    u.voice = FD.roVoice; u.lang = FD.roVoice.lang; u.rate = 1.12;
+    u.voice = FD.roVoice; u.lang = FD.roVoice.lang; u.rate = .86; u.pitch = 1;
     u.onend = fin; u.onerror = fin;
-    FD.timer = setTimeout(fin, 2500 + text.length * 130);
+    FD.timer = setTimeout(fin, 3500 + text.length * 170);
     speechSynthesis.speak(u);
   } else {
-    FD.timer = setTimeout(fin, FD.slow ? Math.max(1700, text.length * 72) : Math.max(1050, text.length * 46));
+    FD.timer = setTimeout(fin, Math.max(1050, text.length * 46));
   }
 }
 function fdRun(i) {
   fdHalt();
-  const e = FD.items[i]; if (!e || (e.it.k !== "L" && e.it.k !== "P")) return;
-  FD.slow = e.it.k === "P";
+  const e = FD.items[i]; if (!e) return;
+  if (e.it.k === "P") { fdPartShow(i, true); return; }
+  if (e.it.k !== "L") return;
   const a = fdArt(i); if (!a) return;
   const bs = [...a.querySelectorAll(".bt")];
   if (e.rev) { bs.forEach(b => b.classList.add("on")); if (FD.voice) { fdSay(e.it.h, () => {}); } return; }
@@ -200,7 +293,7 @@ function fdActivate(i) {
   if (e && e.it.k !== "M" && e.it.k !== "E" && !e.counted) { e.counted = true; st.seen[e.it.id] = (st.seen[e.it.id] || 0) + 1; FD.seenThis++; if (e.it.k === "L" || e.it.k === "P") st.xp += 5; save(); }
   document.querySelectorAll(".reel.now").forEach(a => a.classList.remove("now"));
   const a = fdArt(i); if (a) a.classList.add("now");
-  fdHud(); fdBgFor(i); fdRun(i);
+  fdHud(); fdBgFor(i); fdRun(i); fmChange(i);
 }
 function fdHud() { const st = fdState(); fdEl("fdCombo").textContent = `🔥 ${st.combo}`; fdEl("fdXp").textContent = `✨ ${st.xp}`; }
 
@@ -250,6 +343,8 @@ function fdClick(ev) {
     else if (fa === "q") fdAnswer(i, e, v, v === 0);
     else if (fa === "tf") fdAnswer(i, e, v, (v === 1) === e.it.ok);
     else if (fa === "s") fdAnswer(i, e, v, v === fdSpssAnswer(e.it));
+    else if (fa === "cl") fdClozeAnswer(i, e, btn.dataset.v);
+    else if (fa === "wout") { e.wg = !e.wg; fdPartShow(i, false); }
     else if (fa === "card") {
       S.c[e.it.id] = v === 2 ? Math.min(3, (S.c[e.it.id] || 0) + 1) : 0;
       if (v !== 2) FD.retry.push({ it: e.it, at: FD.items.length + 4 });
@@ -266,7 +361,12 @@ function fdClick(ev) {
     FD.lastTap = 0; return;
   }
   FD.lastTap = t;
-  if (e.it.k === "L" || e.it.k === "P") fdRevealAll(i);
+  if (e.it.k === "P") {
+    if (ev.target.closest(".wg")) return;
+    const r = art.getBoundingClientRect(), back = ev.clientX - r.left < r.width * .28;
+    fdPartStep(i, back ? -1 : 1); return;
+  }
+  if (e.it.k === "L") fdRevealAll(i);
   else if (e.it.k === "C" && !e.rev) {
     e.rev = true;
     art.querySelector(".cback").classList.add("on");
@@ -378,7 +478,8 @@ function fdLabel() { fdEl("fdFilter").textContent = (FD.filter === "story" ? "Se
 function fdFindVoice() {
   if (!window.speechSynthesis) return null;
   const v = speechSynthesis.getVoices().filter(o => /^ro/i.test(o.lang));
-  FD.roVoice = v[0] || null;
+  const rank = o => /natural|neural|premium|enhanced|online/i.test(o.name) ? 0 : /google/i.test(o.name) ? 1 : 2;
+  FD.roVoice = v.slice().sort((a, b) => rank(a) - rank(b))[0] || null;
   return FD.roVoice;
 }
 function fdInit() {
@@ -389,6 +490,7 @@ function fdInit() {
   const box = fdEl("fdScroll");
   FD.io = new IntersectionObserver(es => { es.forEach(en => { if (en.isIntersecting && en.intersectionRatio > .6) fdActivate(+en.target.dataset.i); }); }, { root: box, threshold: [.6] });
   box.addEventListener("click", fdClick);
+  box.addEventListener("input", ev => { const t = ev.target.closest("[data-wid]"); if (!t) return; const a = t.closest(".reel"); fdWidgetLive(a, FD.items[+a.dataset.i]); });
   box.addEventListener("scroll", () => { FD.lastScroll = performance.now(); }, { passive: true });
   fdEl("fdFilter").addEventListener("click", () => { FD.sheet = !FD.sheet; fdSheet(); });
   fdEl("fdSheet").addEventListener("click", ev => {
@@ -407,25 +509,24 @@ function fdInit() {
   if (window.speechSynthesis) { fdFindVoice(); speechSynthesis.onvoiceschanged = fdFindVoice; }
   fdEl("fdMusic").addEventListener("click", ev => {
     ev.stopPropagation();
-    const next = fmNextStyle();
-    if (next && !fmEnsure()) { fdToast("Telefonul nu poate reda muzica"); return; }
-    fmSet(next); S.music = next; save(); fdMusicBtn();
-    fdToast(next ? `Muzică: ${FM_STYLES[next].name}` : "Muzică oprită");
+    if (!FM.on && !fmEnsure()) { fdToast("Telefonul nu poate reda muzica"); return; }
+    const on = fmToggle(); S.music = on ? "auto" : ""; save(); fdMusicBtn();
+    fdToast(on ? "Muzică: alta la fiecare swipe" : "Muzică oprită");
   });
   // După repornire, browserul cere o atingere înainte să permită sunetul.
-  if (S.music && FM_STYLES[S.music]) { FM.style = S.music; }
+  if (S.music) { FM.on = true; }
   fdMusicBtn();
-  const unlock = () => { if (FD.on && FM.style && !FM.timer) fmRun(); };
+  const unlock = () => { if (FD.on && FM.on && !FM.timer) fmRun(); };
   document.addEventListener("click", unlock); document.addEventListener("touchend", unlock);
   addEventListener("keydown", ev => { if (!FD.on) return; if (ev.key === "ArrowDown" || ev.key === "j") { ev.preventDefault(); fdGo(1); } if (ev.key === "ArrowUp" || ev.key === "k") { ev.preventDefault(); fdGo(-1); } });
-  document.addEventListener("visibilitychange", () => { if (!FD.on) return; if (document.hidden) { fdHalt(); fmPause(); } else if (FM.style && FM.ctx) fmRun(); });
+  document.addEventListener("visibilitychange", () => { if (!FD.on) return; if (document.hidden) { fdHalt(); fmPause(); } else if (FM.on && FM.ctx) fmRun(); });
   fdLabel(); fdReset();
 }
 function fdShow() {
   fdEl("feed").hidden = false;
   fdInit();
-  if (!FD.on) { FD.on = true; fdBgSize(); if (FD.cur >= 0) fdBgFor(FD.cur); if (!fdStill()) { FDB.last = performance.now(); FDB.raf = requestAnimationFrame(fdBgLoop); } if (FM.style && FM.ctx) fmRun(); }
+  if (!FD.on) { FD.on = true; fdBgSize(); if (FD.cur >= 0) fdBgFor(FD.cur); if (!fdStill()) { FDB.last = performance.now(); FDB.raf = requestAnimationFrame(fdBgLoop); } if (FM.on && FM.ctx) fmRun(); }
   fdHud();
 }
 function fdHide() { if (!FD.on) { fdEl("feed").hidden = true; return; } FD.on = false; fdHalt(); fmPause(); fdEl("feed").hidden = true; }
-function fdMusicBtn() { const b = fdEl("fdMusic"); b.textContent = FM.style ? "🎶" : "🎵"; b.classList.toggle("off", !FM.style); }
+function fdMusicBtn() { const b = fdEl("fdMusic"); b.textContent = FM.on ? "🎶" : "🎵"; b.classList.toggle("off", !FM.on); }
