@@ -1,0 +1,191 @@
+// Serialul: materia de la zero, în ordine. Fiecare parte explică un singur lucru și duce la următoarea.
+const STORY = [];
+const EPISODES = [];
+let storyPart = 0;
+function stEP(title) { EPISODES.push({ n: EPISODES.length + 1, title, start: STORY.length }); }
+function stP(h, b, n, o) { storyPart++; STORY.push(Object.assign({ k: "P", id: "P" + STORY.length, idx: STORY.length, t: "", ep: EPISODES.length, part: storyPart, h, b, m: n }, o || {})); }
+function stK(q, a, e) { STORY.push({ k: "K", id: "K" + STORY.length, idx: STORY.length, t: "", ep: EPISODES.length, q, a, e }); }
+
+EXHIBITS.mini = corr("Corelații, EVS România 2018", ["Satisfacția cu viața", "Sănătate", "Vârstă"], [".390**", "-.229**", "-.541**"], [".000", ".000", ".000"], [1603, 1550, 1558], [1604, 1612, 1559], "");
+
+stEP("Ce înseamnă să măsori");
+stP("Totul începe cu o întrebare", ["Vrem să aflăm: **cât de mulțumiți de viață sunt românii?**", "Nu putem vedea asta direct.", "Așa că îi întrebăm pe oameni și notăm răspunsurile."], "Ce notăm, mai exact?");
+stP("Ce este o variabilă", ["În 2018, sondajul **EVS** a întrebat 1.613 adulți din România.", "Întrebarea: cât de mulțumit ești de viața ta, de la 1 la 10?", "Răspunsul diferă de la om la om. De aceea se numește **variabilă**."], "Fiecare om dă un răspuns. Cum le spunem?");
+stP("Caz și valoare", ["Fiecare om intervievat este un **caz**.", "Ce a răspuns el este **valoarea** lui.", "Toate valorile la un loc sunt **datele**."], "Dar nota de la 1 la 10 chiar este satisfacția?", { v: "Exemplu: Ana 8 · Ion 5 · Maria 10" });
+stK("Un om răspunde 7 la întrebarea despre satisfacție. Ce este 7?", ["valoarea lui", "cazul", "variabila", "toate datele"], "Omul este cazul. Satisfacția este variabila. 7 este valoarea lui.");
+stP("Construct și indicator", ["Ce vrem să știm: cum își evaluează oamenii viața. Se numește **construct**.", "Constructul nu se vede direct.", "Ce notăm efectiv, nota de la 1 la 10, se numește **indicator**."], "Indicatorul poate greși. Un exemplu.");
+stP("Un indicator imperfect", ["Vrem nivelul de trai dintr-o țară. Acesta e constructul.", "Folosim **PIB-ul pe locuitor**. Acesta e indicatorul.", "În Irlanda, profiturile multinaționalelor umflă PIB-ul. Indicatorul arată un nivel de trai mai mare decât cel real."], "Încă un exemplu din curs.");
+stP("Măsurarea trecutului", ["Vrem CO2 din atmosferă de acum sute de mii de ani: **constructul**.", "Găsim aer prins în ghețari: **indicatorul**.", "La fel, plumbul din gheață indică circulația monetară în argint."], "Verificăm.");
+stK("Măsurăm inteligența printr-un test. Testul este:", ["indicatorul", "constructul", "cazul", "valoarea"], "Inteligența este constructul. Testul este ce măsurăm efectiv.");
+stP("Nu toate răspunsurile sunt numere", ["Unele răspunsuri sunt nume. Altele sunt categorii ordonate. Altele sunt numere.", "Acestea sunt cele trei **niveluri de măsurare**.", "De nivel depinde ce ai voie să calculezi."], "Primul nivel: nominal.");
+stP("Nivelul nominal", ["Exemple: țara, județul, religia, zodia.", "Categoriile **nu au ordine**.", "Poți calcula doar câți sunt, procente și ce apare cel mai des."], "Dacă răspunsurile au o ordine?");
+stP("Nivelul ordinal", ["Exemplu: foarte fericit, destul de fericit, puțin fericit, deloc fericit.", "Categoriile **au ordine**.", "Dar nu știi dacă distanțele dintre ele sunt egale."], "Și dacă sunt numere adevărate?");
+stP("Nivelul numeric", ["Exemple: vârsta, venitul, înălțimea în cm.", "Distanțele sunt **egale**: de la 20 la 21 de ani e cât de la 40 la 41.", "Satisfacția 1–10 e tratată ca numerică, dar e o **aproximare**."], "Verificăm.");
+stK("Județul în care locuiești este o variabilă:", ["nominală", "ordinală", "numerică", "dummy"], "Județele nu au o ordine naturală.");
+stK("„Foarte mulțumit, mulțumit, nemulțumit” este o variabilă:", ["ordinală", "nominală", "numerică", "constantă"], "Categoriile se pot ordona, dar distanțele nu sunt egale.");
+stP("Variabile 0/1", ["Unele variabile au doar două răspunsuri.", "Le notăm cu **1 și 0**. De exemplu, 1 = femeie, 0 = bărbat.", "Se numesc variabile **dummy**."], "Uneori folosim mai mulți indicatori pentru același construct.");
+stP("Mai mulți indicatori", ["Un singur indicator poate fi imperfect, așa că folosim mai mulți.", "Se pot lega de construct în două feluri.", "**Modelul reflectiv** și **modelul formativ**."], "Primul: reflectiv.");
+stP("Modelul reflectiv", ["Constructul **produce** indicatorii.", "Bunăstarea unui om se vede în satisfacție, fericire și sănătate declarată.", "De aceea indicatorii **corelează**, adică se schimbă împreună."], "Al doilea: formativ.");
+stP("Modelul formativ", ["Indicatorii **compun** constructul.", "Inflația este calculată din prețurile unui coș de produse.", "Prețurile pot să nu se schimbe împreună. Constructul este suma lor."], "Verificăm.");
+stK("Nota finală calculată din teme, proiect și examen este un model:", ["formativ", "reflectiv", "nominal", "aleator"], "Componentele compun nota finală.");
+stP("Măsurătorile greșesc", ["**Eroare = valoarea măsurată − valoarea reală.**", "Erorile sunt de două tipuri, după direcție.", "**Aleatorii** și **sistematice**."], "Primele: aleatorii.");
+stP("Erori aleatorii", ["Greșești în toate direcțiile: uneori mai mult, alteori mai puțin.", "Exemplu: estimezi timpul din ochi.", "Scad **fidelitatea**: repetând măsurarea, nu obții același rezultat."], "Acum cele sistematice.");
+stP("Erori sistematice", ["Greșești mereu în aceeași direcție.", "Exemplu: un ceas care rămâne mereu în urmă.", "Scad **validitatea**: nu măsori corect ce vrei să măsori."], "Se întâmplă și în sondaje.");
+stP("Dezirabilitatea socială", ["Oamenii spun uneori ce e bine văzut, nu ce e adevărat.", "Răspunsurile deviază în aceeași direcție.", "Deci e o eroare **sistematică**."], "O măsură poate fi repetabilă și totuși greșită.");
+stP("Fidel, dar nevalid", ["Zodia se stabilește mereu la fel din data nașterii: **fidelă**.", "Ca indicator al personalității: **nevalidă**.", "**Precizie ≈ fidelitate. Acuratețe ≈ validitate.**"], "Ce fac erorile cu rezultatele?");
+stP("Efectul erorilor", ["Erorile aleatorii independente **slăbesc** legăturile dintre variabile.", "Erorile sistematice pot crea legături **false**.", "Ca exemplu: bărbații recunosc mai ușor în chestionar că nu plătesc biletul."], "Verificăm.");
+stK("Un cântar arată mereu cu 2 kg în plus. Eroarea este:", ["sistematică, scade validitatea", "aleatorie, scade fidelitatea", "aleatorie, scade validitatea", "nu este o eroare"], "Abaterea e mereu în aceeași direcție.");
+
+stEP("Cum descrii datele");
+stP("Avem 1.600 de note. Și acum?", ["Nu poți citi fiecare răspuns.", "Vezi câți oameni au ales fiecare valoare. Asta este **distribuția**.", "O rezumi prin: ce e tipic, cât diferă oamenii, ce excepții sunt."], "Prima măsură: media.");
+stP("Media", ["Aduni toate valorile și împarți la câte sunt.", "(2 + 4 + 4 + 10) / 4 = **5**.", "În România 2018, media satisfacției este **7,49**."], "Media unei variabile 0/1 are un sens special.", { v: "2 · 4 · 4 · 10" });
+stP("Media unei variabile 0/1", ["Din 100 de oameni, 46 au valoarea 1 și 54 au valoarea 0.", "Media este 46 / 100 = **0,46**.", "Înseamnă **46% femei**."], "Media are o problemă.");
+stP("Mediana", ["Pui valorile în ordine.", "**Mediana** este valoarea din mijloc.", "Pentru 2, 4, 4, 10, mediana este **4**."], "Și valoarea cea mai frecventă?", { v: "2 · 4 · 4 · 10" });
+stP("Modul", ["**Modul** este valoarea care apare cel mai des.", "Pentru 2, 4, 4, 10, modul este **4**.", "În România 2018, modul este **10**: 27% au ales nota maximă."], "De ce avem nevoie de trei măsuri?");
+stP("Valorile extreme", ["Trei studenți au scris la vârstă 99, 121 și 1.000.", "Media a sărit de la 23,0 la **27,7**.", "Mediana a rămas **22**. Extremele schimbă media, nu mediana."], "Ce faci cu o valoare extremă?");
+stP("Outlier", ["O valoare foarte departe de restul se numește **outlier**.", "Poate fi o greșeală sau un caz real.", "O **verifici**. Nu o elimini doar pentru că schimbă media."], "Satisfacția românilor are și ea o particularitate.");
+stP("Distribuție asimetrică", ["România 2018: media **7,49**, mediana **8**.", "O minoritate foarte nemulțumită trage media în jos.", "Media este trasă spre partea cu valori rare, numită **coadă**."], "Verificăm.");
+stK("Pentru valorile 1, 2, 3, 100, care măsură e cel mai afectată de 100?", ["media", "mediana", "niciuna", "ambele la fel"], "Media este 26,5, iar mediana este 2,5.");
+stP("Variabilitatea", ["Două restaurante au media 8.", "La primul, notele sunt între 7 și 9. La al doilea, între 1 și 10.", "Cât de împrăștiate sunt valorile se numește **variabilitate**."], "Cum măsori împrăștierea?");
+stP("Amplitudine și percentile", ["**Amplitudine** = valoarea maximă − valoarea minimă.", "**Percentila** este valoarea sub care se află un procent din cazuri.", "**Cuartila 1** are 25% din cazuri sub ea. Mediana are 50%."], "Măsura cea mai folosită.");
+stP("Abaterea standard", ["**Abaterea** este distanța unei valori față de medie.", "**Varianța** este media pătratelor abaterilor.", "**Abaterea standard** este rădăcina varianței și are unitatea datelor."], "Ce arată la satisfacție?");
+stP("Ce arată abaterea standard", ["Satisfacția în România: abaterea standard este **2,3**.", "Valorile sunt, de obicei, cam la 2,3 puncte de medie.", "Abatere mare = oameni mai diferiți între ei."], "O distribuție specială.");
+stP("Distribuția normală", ["Are forma unui clopot și este simetrică.", "Media, mediana și modul **coincid**.", "**68%** din valori sunt la o abatere standard, **95%** la două, **99,7%** la trei."], "Variabilitatea veniturilor are propria măsură.");
+stP("Indicele Gini", ["Măsoară **inegalitatea** veniturilor sau a averii.", "**0** = toți au la fel.", "**1 sau 100** = o singură persoană are tot."], "O medie nu spune totul despre oameni.");
+stP("Medii și indivizi", ["Media satisfacției: România 7,7, Bulgaria 5,9.", "Asta compară **țările**.", "Mulți bulgari sunt mai mulțumiți decât mulți români. Valorile se suprapun."], "Verificăm.");
+stK("Bărbații sunt, în medie, mai înalți decât femeile. Ce rezultă?", ["media bărbaților e mai mare, dar multe femei sunt mai înalte decât mulți bărbați", "orice bărbat e mai înalt decât orice femeie", "orice femeie e mai înaltă decât orice bărbat", "nu există diferență între medii"], "O medie descrie grupul, nu fiecare persoană.");
+
+stEP("Legătura dintre două variabile");
+stP("O variabilă nu e de ajuns", ["Știm cât de mulțumiți sunt oamenii.", "Acum vrem să știm **cu ce are legătură** satisfacția.", "Întrebare: cei sănătoși sunt mai mulțumiți?"], "Ce înseamnă „legătură”?");
+stP("Asocierea", ["Două variabile sunt **asociate** dacă, știind-o pe una, o estimezi mai bine pe cealaltă.", "Dacă știi starea de sănătate, estimezi mai bine satisfacția.", "Dacă nu te ajută deloc, nu sunt asociate."], "Cum vezi asta în date?");
+stP("Tabelul de contingență", ["Compari **procentele pe coloane**.", "La sănătate bună: 45,2% au satisfacție ridicată.", "La sănătate satisfăcătoare sau proastă: **23,5%**. Procentele diferă, deci există asociere."], "Tabelul arată și ce produce ce?", { x: "t3" });
+stP("Asocierea nu arată cauza", ["Sănătatea poate crește satisfacția.", "Dar și oamenii mulțumiți își pot evalua mai bine sănătatea.", "Tabelul arată că sunt asociate, **nu ce produce ce**."], "Dacă variabilele sunt numere?");
+stP("Norul de puncte", ["Fiecare punct este un caz, aici o țară.", "Orizontal: PIB-ul. Vertical: satisfacția.", "Punctele urcă: țările bogate au satisfacție mai mare."], "Ce citești pe un astfel de grafic?", { x: "fig6" });
+stP("Patru lucruri de citit", ["**Sensul**: urcă sau coboară.", "**Forma**: dreaptă sau curbă.", "**Intensitatea** și **excepțiile**: cât de strânse sunt punctele și ce puncte ies din tendință."], "Vrem un singur număr pentru toate astea.");
+stP("Coeficientul de corelație r", ["**r** este un număr care rezumă legătura liniară dintre două variabile numerice.", "Ia valori între **−1** și **+1**.", "Liniară înseamnă că punctele urmează o linie dreaptă."], "Ce arată semnul?");
+stP("Semnul lui r", ["**r pozitiv**: valorile mari merg cu valori mari.", "**r negativ**: valorile mari merg cu valori mici.", "Satisfacție–vârstă: **−0,229**. Vârstnicii sunt ceva mai puțin mulțumiți."], "Ce arată mărimea?");
+stP("Tăria lui r", ["Cu cât e mai aproape de 1 sau −1, cu atât legătura e mai puternică.", "Se compară în **valoare absolută**, fără semn.", "−0,45 este mai puternic decât +0,40."], "Praguri orientative.");
+stP("Cum apreciezi r", ["Aproximativ **0,1**: slabă.", "Aproximativ **0,3**: moderată.", "Peste **0,5**: puternică."], "Verificăm.");
+stK("Care corelație este cea mai puternică?", ["−0,60", "+0,50", "+0,30", "−0,10"], "Compari fără semn: 0,60 este cel mai mare.");
+stK("r = −0,50 între vârstă și sănătate înseamnă:", ["persoanele în vârstă tind să aibă sănătate mai slabă", "persoanele în vârstă tind să aibă sănătate mai bună", "50% dintre vârstnici sunt bolnavi", "vârsta nu are legătură cu sănătatea"], "Semnul minus unește valori mari cu valori mici.");
+stP("r = 0 nu înseamnă nimic?", ["r vede numai legături **liniare**.", "În norul C, relația este clară, dar are formă de U.", "r e aproape **0**, deși variabilele sunt legate."], "Ce NU este r?", { x: "panels" });
+stP("Ce NU este r", ["r = 0,35 **nu** înseamnă 35%.", "r **nu** arată cu cât crește o variabilă.", "r **nu** arată cauza."], "Există totuși un procent ascuns în r.");
+stP("r pătrat", ["Ridici r la pătrat: **r²**.", "r = 0,5 dă r² = **0,25**.", "Cele două variabile au **25%** din variație în comun."], "r nu compară nici mediile.");
+stP("r nu compară mediile", ["71% aleg „împărțirea treburilor”.", "27% aleg „acordul politic”.", "Totuși r = **0,29**: cei care aleg unul tind să-l aleagă și pe celălalt."], "Ce legătură are cu covarianța?");
+stP("Covarianță și corelație", ["**Covarianța** arată doar sensul.", "Mărimea ei depinde de unitățile de măsură.", "**Corelația** arată sensul și tăria, fără unități."], "Câteva cazuri pot schimba r.");
+stP("Cazurile extreme și r", ["PIB–satisfacție: r = **0,54**.", "Fără Luxemburg și Irlanda: r = **0,69**.", "Câteva cazuri extreme pot schimba mult coeficientul."], "Verificăm.");
+stK("r = 0 între două variabile numerice înseamnă:", ["nu există o legătură liniară", "nu există nicio legătură, de niciun fel", "o variabilă este constantă", "mediile sunt egale"], "O legătură curbă rămâne posibilă.");
+
+stEP("De la 1.613 oameni la toată țara");
+stP("Nu poți întreba toți românii", ["**Populația**: toți cei despre care vrei să știi ceva. Aici, adulții din România.", "**Eșantionul**: cei pe care îi studiezi efectiv. Aici, 1.613.", "**Generalizarea**: tragi concluzii despre populație din eșantion."], "Când ai voie să generalizezi?");
+stP("Eșantion probabilist", ["Oamenii sunt aleși **prin tragere la sorți**.", "Doar așa generalizezi, cu o marjă de eroare.", "EVS România 2018 este un eșantion probabilist."], "Există patru feluri.");
+stP("Patru eșantioane probabiliste", ["**Simplu aleatoriu**: toți au aceeași șansă.", "**Sistematic**: din k în k dintr-o listă, cu start aleatoriu.", "**Stratificat**: extragi din fiecare categorie. **Pe clustere**: tragi la sorți grupuri întregi."], "Ce se întâmplă fără tragere la sorți?");
+stP("Eșantioane neprobabiliste", ["**Disponibilitate**: cine e la îndemână, de exemplu studenții din sală.", "**Bulgăre de zăpadă**: respondenții recomandă alți respondenți.", "**Teoretic**: alegi intenționat. Niciunul nu permite generalizarea."], "Un exemplu din curs.");
+stP("Sondajul „Relații de succes”", ["L-au completat studenții prezenți la curs.", "Este un eșantion de **disponibilitate**.", "Rezultatele descriu acești studenți, nu toți studenții din România."], "Chiar și tragerea la sorți poate fi deformată.");
+stP("Cine răspunde contează", ["La sondajele telefonice răspund mai des oamenii mai agreabili și mai încrezători.", "Sondajele nu includ oameni din spitale, închisori sau mănăstiri.", "Așadar și un eșantion probabilist se poate deforma."], "Verificăm.");
+stK("Întrebi studenții din sala ta. Eșantionul este:", ["de disponibilitate", "simplu aleatoriu", "stratificat", "pe clustere"], "Răspund cei la îndemână, deci nu poți generaliza.");
+stP("Problema întâmplării", ["Am găsit în eșantion o corelație.", "Dar poate a apărut **din întâmplare**, chiar dacă în populație nu există.", "Avem nevoie de un număr care să ne spună asta."], "Acel număr: Sig.");
+stP("Sig. sau p", ["**Sig.** se mai numește **p**.", "Presupunem că în populație **nu există** relație.", "Sig. arată cât de probabil e să obținem o corelație cel puțin atât de mare **doar din întâmplare**."], "Cum îl folosești?");
+stP("Pragul 0,05", ["Dacă **Sig. < 0,05**, rezultatul e **semnificativ statistic**.", "Adică probabil relația există și în populație.", "Dacă Sig. ≥ 0,05, este **nesemnificativ**."], "De ce depinde Sig.?");
+stP("De ce depinde Sig.", ["Scade pentru corelații mai **mari**.", "Scade pentru eșantioane mai **mari**.", "Cu N foarte mare, chiar și o corelație foarte mică devine semnificativă."], "De aici vine marea capcană.");
+stP("Sig. nu arată tăria", ["**Tăria** o arată r.", "r = −0,07, N = 1.612, Sig. = 0,004.", "Este **semnificativă**, dar **foarte slabă**."], "Alte interpretări greșite.");
+stP("Ce NU înseamnă Sig.", ["Sig. = 0,02 **nu** înseamnă 98% șanse să existe relația.", "**Nu** înseamnă că 98 din 100 de eșantioane dau același rezultat.", "**Nu** arată cauza."], "Dacă e nesemnificativ?");
+stP("Nesemnificativ", ["Nu înseamnă că relația lipsește sigur.", "Poate fi slabă, iar eșantionul prea mic.", "Pur și simplu **n-am demonstrat-o**."], "Și la un eșantion neprobabilist?");
+stP("Sig. nu repară eșantionul", ["Dacă eșantionul nu este aleatoriu, **nu generalizezi**.", "Chiar dacă Sig. este 0,001.", "La „Relații de succes”, Sig. e prezentat doar ilustrativ."], "Verificăm.");
+stK("r = 0,10, Sig. = 0,001, N = 3.000. Care afirmație e corectă?", ["relația e semnificativă, dar slabă", "relația e foarte puternică", "relația e cauzală", "relația lipsește în populație"], "Intensitatea o dă r, iar N mare face Sig. mic.");
+stK("Sig. = 0,20 înseamnă:", ["rezultatul nu e semnificativ la pragul 0,05", "relația există cu probabilitate de 80%", "corelația este 0,20", "relația lipsește sigur"], "0,20 este mai mare decât 0,05.");
+
+stEP("Cum citești tabelul SPSS");
+stP("Ce este SPSS", ["Este programul care calculează statisticile.", "La examen vei avea **tabele de corelații** din SPSS.", "Acum știi tot ce îți trebuie: r, Sig. și N."], "Hai să vedem unul.");
+stP("Primul tabel", ["Pe rânduri și coloane sunt aceleași variabile.", "Pentru fiecare pereche ai trei rânduri: **r, Sig., N**.", "Găsești o variabilă pe rând și cealaltă pe coloană."], "Ce sunt numerele astea ciudate?", { x: "mini" });
+stP("Zeroul lipsă", ["SPSS scrie **.390**.", "Înseamnă **0,390**.", "Scrie **−.229**, adică **−0,229**."], "Și .000?");
+stP("Sig. = .000", ["SPSS afișează doar trei zecimale.", ".000 înseamnă **p < 0,001**.", "Nu înseamnă zero."], "Ce sunt steluțele?");
+stP("Steluțele", ["**\\*\\*** = semnificativ la pragul 0,01.", "**\\*** = semnificativ la pragul 0,05.", "Fără steluță = nesemnificativ la 0,05."], "Numărul N.");
+stP("N în tabel", ["N este câți oameni au răspuns la **ambele** variabile.", "Satisfacție–vârstă: **N = 1550**.", "Fiecare pereche are N-ul ei: se numește excludere pe perechi."], "Și valorile de 1?");
+stP("Diagonala", ["Fiecare variabilă cu ea însăși are **1**.", "Tabelul este simetric: același număr apare de două ori.", "Te uiți doar la o jumătate."], "Citim o celulă.");
+stP("Citim o celulă", ["Vârstă–sănătate: **−.541\\*\\***, Sig. .000, N = 1558.", "Sens negativ: vârstnicii își evaluează sănătatea mai slab.", "Puternică și semnificativă."], "Dacă o variabilă este 0/1?");
+stP("Citim o variabilă 0/1", ["Gen feminin–sănătate: **−.071\\*\\***. Gen: 1 = femeie.", "Minus: femeile au, în medie, un scor mai mic.", "Semnificativ, dar **foarte slab**."], "Verificăm.");
+stK("În SPSS: r = .540**, Sig. = .000. Ce înseamnă?", ["corelație pozitivă, puternică, semnificativă", "corelație negativă, slabă, nesemnificativă", "54% dintre cazuri sunt asociate", "probabilitatea este exact zero"], ".540 înseamnă 0,540, iar Sig. .000 înseamnă p < 0,001.");
+stK("r = −.048, Sig. = .056. La pragul 0,05, corelația este:", ["nesemnificativă", "semnificativă", "puternică", "cauzală"], "0,056 este mai mare decât 0,05.");
+stK("Care corelație este cea mai puternică: −.541, .540, .390?", ["−.541", ".540", ".390", "sunt egale"], "În valoare absolută, 0,541 este mai mare decât 0,540.");
+
+stEP("Cum greșim explicația");
+stP("Corelația nu înseamnă cauzalitate", ["Am găsit: A și B corelează.", "Nu rezultă că **A produce B**.", "Aceeași corelație poate avea explicații diferite."], "Explicația se numește model.");
+stP("Modelul", ["**Modelul** este explicația despre ce produce ce.", "Dacă modelul e greșit, concluzia e greșită.", "Cursul descrie **șapte erori de modelare**."], "Eroarea 1.");
+stP("1. Corelații coincidentale", ["Consumul de margarină și divorțurile din Maine corelează aproape perfect.", "Nu există nicio legătură reală.", "Dacă cauți prin foarte multe date, găsești corelații apărute **la întâmplare**."], "Eroarea 2.");
+stP("2. Sensul cauzării", ["Competențele reduse produc sărăcie?", "Sau sărăcia reduce competențele?", "Presupusul efect poate fi cauza, sau relația merge în **ambele sensuri**."], "Eroarea 3.");
+stP("3. Corect din rațiuni false", ["Acum 100 de ani, femeile erau rare în profesiile intelectuale.", "Relația există, dar cauza este **accesul la educație**.", "Relația trece prin altă variabilă, care schimbă explicația."], "Eroarea 4, cea mai frecventă.");
+stP("4. Cauzalitate iluzorie", ["La copii, mărimea pantofului corelează cu abilitatea de a citi.", "Ambele cresc cu **vârsta**.", "A și B corelează pentru că au o **cauză comună C**, numită terță variabilă."], "Un exemplu din curs.");
+stP("Ciocolata și premiile Nobel", ["Consumul de ciocolată și premiile Nobel: r = **0,79**.", "Premiile Nobel corelează și cu magazinele IKEA: 0,82.", "Cauza comună probabilă este **bogăția țării**."], "Eroarea 5.");
+stP("5. Eroare sistematică de măsurare", ["Bărbații par să nu plătească biletul mai des.", "Dar ei **recunosc mai ușor** asta în chestionar.", "O variabilă omisă deformează măsurarea."], "Eroarea 6.");
+stP("6. Paradoxul lui Simpson", ["În fiecare cartier, mai multe camere înseamnă preț mai mare.", "Pe tot orașul, casele mari sunt mai ieftine, pentru că sunt la periferie.", "Variabila omisă, **cartierul**, inversează relația."], "Eroarea 7.");
+stP("7. Eroarea ecologică", ["Între țări, unde se fumează mai mult se trăiește mai mult.", "La persoane, fumatul scade speranța de viață.", "Nu tragi concluzii despre **indivizi** din date despre **grupuri**."], "Verificăm.");
+stK("Vânzările de înghețată corelează cu criminalitatea, iar ambele cresc vara. Eroarea este:", ["cauzalitate iluzorie", "eroarea ecologică", "paradoxul lui Simpson", "eroare aleatorie"], "Vara este cauza comună.");
+stK("Țările cu PIB mare au satisfacție mare. Concluzia „oamenii cu venit mare sunt mai mulțumiți” este:", ["o posibilă eroare ecologică", "demonstrată de date", "un paradox Simpson sigur", "o eroare aleatorie"], "Datele sunt despre țări, nu despre persoane.");
+stP("Cauză comună sau verigă?", ["Vârstnicii sunt mai puțin mulțumiți, iar vârsta e legată de sănătate.", "Sănătatea nu produce vârsta, deci **nu e cauză comună**.", "E o **verigă intermediară**: vârstă → sănătate → satisfacție, eroarea 3."], "Semnificația nu ne salvează.");
+stP("Semnificativ nu înseamnă cauzal", ["La o petrecere, cei care beau vin roze sunt mai scunzi, semnificativ statistic.", "Femeile beau mai des roze și sunt, în medie, mai scunde.", "Sig. mic **nu exclude** o terță variabilă."], "Verificăm.");
+stK("În fiecare cartier, relația este pozitivă, dar pe tot orașul este negativă. Aceasta este:", ["paradoxul lui Simpson", "sensul cauzării", "corelație coincidentală", "fidelitate scăzută"], "Variabila omisă inversează relația.");
+
+stEP("Analiza factorială");
+stP("Prea mulți indicatori", ["Avem satisfacția, fericirea și sănătatea declarată.", "Corelează între 0,39 și 0,54.", "Poate că arată un singur lucru comun."], "Asta caută analiza factorială.");
+stP("Ce face analiza factorială", ["Pornește de la **modelul reflectiv**.", "Indicatorii care corelează pot avea o dimensiune comună.", "Această dimensiune se numește **factor**."], "Cum o găsești?");
+stP("Trei etape", ["**1. Matricea de corelații** dintre indicatori.", "**2. Selecția factorilor.**", "**3. Interpretarea și etichetarea.**"], "Câți factori păstrezi?");
+stP("Valoarea proprie", ["Fiecare factor are o **valoare proprie** (eigenvalue).", "Arată câtă variație din date explică.", "**Regula Kaiser**: păstrezi factorii cu valoarea proprie **peste 1**."], "Hai să citim un tabel.");
+stP("Citim tabelul", ["Patru factori au valoarea peste 1: 2,20, 1,50, 1,27, 1,09.", "Coloana Cumulative %: împreună explică **61%**.", "Păstrăm **patru factori** din 10 indicatori."], "Mai există o metodă.", { x: "var6" });
+stP("Testul grohotișului", ["Este un grafic cu valorile proprii, numit **scree plot**.", "Curba coboară abrupt, apoi se aplatizează.", "Păstrezi factorii de **dinainte** de aplatizare."], "Ce înseamnă fiecare factor?");
+stP("Matricea de structură", ["Conține corelațiile dintre **indicatori și factori**.", "Se citește **pe coloane**.", "Indicatorii cu valori mari dau numele factorului."], "Exemplu.", { x: "st6" });
+stP("Semnul unui factor", ["La „Banii”, venitul are **−0,86**.", "Un scor mare înseamnă că persoana cere **puțin** venit.", "Semnul e o convenție, dar trebuie citit."], "Ce obținem la final?");
+stP("Scorurile factoriale", ["Fiecare om primește un scor pe **fiecare** factor.", "Scorurile sunt variabile noi, continue.", "Un om poate avea scoruri mari pe mai mulți factori."], "Cine decide numărul și numele?");
+stP("Decizia analistului", ["Numărul și numele factorilor sunt **decizii ale analistului**.", "Numele e o interpretare.", "PCA, metoda din SPSS, rezumă toată variația; analiza factorială, doar variația comună."], "Verificăm.");
+stK("Regula Kaiser păstrează factorii cu:", ["valoarea proprie peste 1", "valoarea proprie sub 1", "Sig. sub 0,05", "corelații negative"], "Astfel de factori explică mai mult decât un singur indicator.");
+stK("Analiza factorială grupează:", ["variabile", "oameni", "țări", "eșantioane"], "Grupează indicatorii care corelează.");
+
+stEP("Analiza cluster");
+stP("Acum grupăm oamenii", ["Analiza factorială a grupat **variabile**.", "Analiza cluster grupează **cazuri**: oameni sau țări.", "Pune împreună cazurile asemănătoare."], "Cum funcționează?");
+stP("K-means", ["Alegi numărul de grupuri, **k**, și plasezi k centre.", "Fiecare caz merge la centrul cel mai apropiat.", "Recalculezi centrele și **repeți** până când grupurile nu se mai schimbă."], "Ce rezultă?");
+stP("Rezultatul", ["O singură variabilă nouă, cu valori de la 1 la k.", "Valorile sunt doar **etichete**.", "Fiecare caz aparține **unui singur** tip."], "Cine alege k?");
+stP("Numărul de grupuri", ["Îl alege **analistul**.", "Încearcă mai multe soluții.", "Se uită la cât de bine se pot interpreta grupurile."], "Hai să citim un rezultat.");
+stP("Citim tipurile", ["Citim **pe coloane** mediile fiecărui tip.", "44% sunt mulțumiți și sănătoși.", "21% sunt mulțumiți (7,8), deși sănătatea e **2,8**."], "Ce nu sunt tipurile?", { x: "t9" });
+stP("Limitele tipurilor", ["Membrii unui tip **nu sunt identici**.", "Seamănă mai mult între ei decât cu ceilalți.", "Un tip descrie o combinație de valori, **nu o cauză**."], "Verificăm.");
+stK("Rezultatul K-means pentru fiecare om este:", ["un singur tip", "un scor pe fiecare factor", "un coeficient Beta", "o valoare Sig."], "Fiecare caz aparține unui singur tip.");
+stK("Numărul de clustere este stabilit de:", ["analist", "valoarea Sig.", "SPSS, automat și corect", "numărul de cazuri"], "Analistul testează mai multe soluții.");
+
+stEP("Regresia");
+stP("Revenim la vârstă", ["Vârstnicii sunt mai puțin mulțumiți: r = −0,23.", "Dar vârstnicii au și sănătate mai slabă.", "Vrem să comparăm oameni **cu aceeași sănătate**."], "Asta face regresia.");
+stP("Ce este regresia", ["Explică o variabilă, **Y**, prin mai multe variabile, **X**.", "X-urile se numesc **predictori**.", "Fiecare predictor e analizat cu ceilalți **ținuți constanți**."], "Cum compari predictorii?");
+stP("Beta și R²", ["**Beta** e coeficientul standardizat. Se poate compara între predictori.", "Beta mai mare, fără semn, înseamnă legătură mai puternică.", "**R²** arată ce proporție din variația lui Y explică modelul."], "Citim regresia.");
+stP("Citim regresia", ["Vârsta singură: Beta **−0,23**.", "Cu sănătatea în model: **−0,03**, nesemnificativ.", "Legătura vârstă–satisfacție se explică în mare parte prin sănătate. R² urcă la 15%."], "Adăugarea unui predictor schimbă totul.", { x: "t10" });
+stP("Se schimbă toți coeficienții", ["Religiozitatea și acordul cu părinții de același sex.", "Fără țară în model: **−0,43**. Cu țară: **−0,22**.", "Variabila omisă era **țara**."], "Verificăm.");
+stK("Beta unui predictor arată relația lui cu Y:", ["când ceilalți predictori sunt ținuți constanți", "fără nicio altă variabilă", "ca procent din eșantion", "numai pentru cazurile extreme"], "Asta o deosebește de corelația simplă.");
+stK("R² = 15% înseamnă:", ["modelul explică 15% din variația lui Y", "15% dintre oameni sunt mulțumiți", "corelația este 0,15", "Sig. este 0,15"], "R² este proporția din variație explicată.");
+
+stEP("Rețele și serii de timp");
+stP("Analiza de rețea", ["Studiază **legăturile** dintre noduri.", "Nodurile pot fi oameni, orașe sau cuvinte-cheie.", "**Centralitatea** arată cât de conectat e un nod."], "De ce seamănă vecinii?");
+stP("Contagiune și homofilie", ["**Contagiune**: te influențează cei din jur.", "**Homofilie**: oamenii asemănători se aleg între ei.", "Doar din asemănare nu poți ști care e."], "Acum timpul.");
+stP("Serii de timp", ["Urmărești **aceeași variabilă** la momente succesive.", "Seria se descompune în **tendință, variație sezonieră, variație aleatorie**.", "Se folosește pentru prognoze."], "Atenție la salturi.");
+stP("Ruptura de serie", ["Un salt brusc poate fi o **schimbare de măsurare**.", "Altă metodă, altă sursă, alt chestionar.", "Eurostat: **b** = ruptură de serie, **u** = fiabilitate scăzută."], "Verificăm.");
+stK("Un salt brusc într-o serie, cu marcajul b, înseamnă că verifici întâi:", ["dacă s-a schimbat măsurarea", "valoarea r", "numărul de clustere", "modul distribuției"], "b înseamnă break in time series.");
+
+stEP("Cum citești graficele");
+stP("Înainte de valori", ["Citești **titlul, sursa și axele**.", "Verifici ce reprezintă un punct sau o linie.", "Verifici de unde începe axa: dacă nu începe de la zero, diferențele par mai mari."], "Citim un grafic de evoluție.");
+stP("Grafic de evoluție", ["Bulgaria: de la **4,8** la **6,3**.", "România: de la 7,2 la 7,8.", "Distanța se face scăzând valorile din **același an**."], "Ce e ciudat aici?", { x: "fig20" });
+stP("Germania în 2022", ["Scade brusc la **6,5**, apoi revine la 7,0.", "Eurostat marchează valoarea ca având fiabilitate scăzută.", "Verifici sursa înainte să explici."], "Două capcane de citire.");
+stP("Două capcane", ["Axa merge de la 4,5 la 8,5, dar valorile sunt între **4,8 și 7,9**.", "Nu compari medii de pe scale diferite, 1–10 și 0–10.", "Citești punctele, nu marginile."], "Ultimele reguli.");
+stP("Plafon și puncte", ["**Efect de plafon**: aproape de capătul scalei, valoarea poate crește puțin.", "Dacă punctele sunt țări, relația descrie țările, nu oamenii.", "Un caz contrar nu infirmă tendința."], "Verificăm.");
+stK("Un grafic are axa verticală de la 4,5 la 8,5. Valorile reale:", ["se citesc din puncte", "sunt sigur între 4,5 și 8,5, inclusiv capetele", "încep de la 0", "sunt toate egale"], "Limitele axei nu sunt limitele datelor.");
+
+stEP("Studiile din Cursul 6");
+stP("Întrebarea din Cursul 6", ["Ce cred studenții că face o căsătorie să reușească?", "Sondaj „Relații de succes”, **N = 245**.", "Doar 18 au fost căsătoriți: datele arată **așteptări**, nu experiențe."], "Ce au găsit?");
+stP("Patru teorii", ["Din 10 criterii au ieșit patru factori.", "**Banii, familia tradițională, parteneriatul egal, intimitatea.**", "Fidelitatea e aleasă de 93% dintre studenți."], "Ce îi deosebește pe studenți?");
+stP("Regresia la studenți", ["Religiozitatea: **+0,47** pe familia tradițională.", "Gen feminin: **+0,24** pe parteneriat egal.", "Facultatea nu atinge pragul; diferența vine mai ales din compoziția pe gen."], "Tipuri de respondenți.");
+stP("Patru tipuri", ["Familie extinsă **19%**, Parteneri egali **30%**.", "Cuplu fără copii **26%**, Totul contează **26%**.", "Alt lot de studenți, alt tip dominant."], "Al doilea studiu.");
+stP("Părinții de același sex", ["Procent de acord: România **12%**, Suedia **76%**.", "Țara singură explică **29%** din variație.", "Tinerii români (19%) sunt sub vârstnicii din Suedia (70%)."], "Ce ne învață?");
+stP("Șase reguli", ["Verifică datele. Alege atent indicatorii.", "Spune cine lipsește din date. Compară mai multe metode.", "Include contextul. **Corelația nu e cauzalitate.**"], "Mai rămâne Cursul 1.");
+stK("Doar 18 din 245 studenți au fost căsătoriți. Ce arată datele?", ["așteptări, nu experiențe", "experiențe reale de cuplu", "toți studenții din România", "cauzele divorțurilor"], "Studenții spun ce cred că face o căsătorie să reușească.");
+
+stEP("Bonus: Cursul 1");
+stP("Statistică și știința datelor", ["Statistica: date structurate, modele din discipline, **înțelegere** și predicție.", "Știința datelor: date vaste, modele din date, **clasificare** și predicție.", "Fișa de notare trece grila doar pe cursurile 2, 4, 5 și 6."], "Ce e o știință?");
+stP("Ce este o știință", ["Studiul prin **metode falsificabile** al unei forme de ordine a lumii.", "Fiecare domeniu are propria logică a dovezilor.", "Demonstrație, experiment, compromis, interpretare, procedură, persuasiune."], "Problema cu IA.");
+stP("Cunoaștere fără origini", ["IA transformă toate sursele în tokenuri.", "Marcajele logicii dovezilor se pierd.", "Textul sună sigur, dar nu știi pe ce se bazează."], "Oamenii reacționează când sunt studiați.");
+stP("Reflexivitate", ["Obiectul studiat **se schimbă** când este studiat.", "**Efectul Hawthorne**: oamenii se schimbă când sunt observați.", "**Teorema lui Thomas**: situațiile definite ca reale devin reale prin consecințe."], "Cine răspunde când IA greșește?");
+stP("Responsabilitate", ["**Zonă morală de șoc**: omul preia vina.", "**Scurgere de responsabilitate**: răspunderea se difuzează.", "**Centaur inversat**: mașina conduce, omul completează lacunele."], "");

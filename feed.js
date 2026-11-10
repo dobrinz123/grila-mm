@@ -1,6 +1,6 @@
 "use strict";
 // Feed vertical: un ecran, o idee. Se încarcă înainte de app.js; folosește S, Q, CD abia la rulare.
-const FD = { lastScroll: 0, items: [], cur: -1, on: false, filter: "all", pi: 0, retry: [], voice: false, roVoice: null, tok: 0, timer: null, lastT: null, recent: [], ok: 0, tot: 0, ready: false, pool: null, lastTap: 0, io: null, seenThis: 0, sheet: false };
+const FD = { lastScroll: 0, items: [], cur: -1, on: false, filter: "story", si: 0, ended: false, pi: 0, retry: [], voice: false, roVoice: null, tok: 0, timer: null, lastT: null, recent: [], ok: 0, tot: 0, ready: false, pool: null, lastTap: 0, io: null, seenThis: 0, sheet: false };
 const FD_PATTERN = ["L", "L", "Q", "L", "T", "L", "S", "Q", "L", "C", "T"];
 const FD_WIN = ["W", "Ai gătit 🔥", "Aura +100", "Sigma move", "Curat", "Absolute cinema", "Locked in", "Prea ușor"];
 const FD_LOSE = ["L", "Cooked 💀", "Plot twist: nu", "Aura în minus", "Aproape, șefu'", "Skill issue, dar reparabil"];
@@ -35,6 +35,7 @@ function fdBuild() {
   FD.pool = { L: REELS, T: TRAPS, Q: Q.filter(fdFits).map(o => Object.assign({ k: "Q" }, o)), C: CD.map(c => Object.assign({ k: "C" }, c)), S: fdSpssItems() };
   FD.byId = {};
   Object.values(FD.pool).forEach(p => p.forEach(it => { FD.byId[it.id] = it; }));
+  STORY.forEach(it => { FD.byId[it.id] = it; });
 }
 function fdPick(kind) {
   const st = fdState();
@@ -57,6 +58,11 @@ function fdNext() {
   const n = FD.items.length;
   const due = FD.retry.findIndex(r => r.at <= n);
   if (due >= 0) return FD.retry.splice(due, 1)[0].it;
+  if (FD.filter === "story") {
+    if (FD.si < STORY.length) return STORY[FD.si++];
+    if (!FD.ended) { FD.ended = true; return { k: "E", id: "END", t: "" }; }
+    return null;
+  }
   if (n && n % 20 === 0) return { k: "M", id: "M" + n, t: "" };
   for (let tries = 0; tries < FD_PATTERN.length * 2; tries++) {
     const kind = FD_PATTERN[FD.pi++ % FD_PATTERN.length];
@@ -75,7 +81,7 @@ function fdAppend(count) {
   for (let c = 0; c < count; c++) {
     const it = fdNext(); if (!it) break;
     const i = FD.items.length;
-    FD.items.push({ it, ans: null, rev: false, opts: it.k === "Q" ? orderFor(it) : null });
+    FD.items.push({ it, ans: null, rev: false, opts: it.k === "Q" || it.k === "K" ? orderFor(it) : null });
     const a = document.createElement("article");
     a.className = "reel"; a.dataset.i = i;
     a.style.background = FD_COLORS[i % FD_COLORS.length][0];
@@ -87,7 +93,7 @@ function fdAppend(count) {
 
 /* Afișarea fiecărui reel */
 function fdArt(i) { return document.querySelector(`.reel[data-i="${i}"]`); }
-function fdRail(e) { const on = fdState().saved.indexOf(e.it.id) >= 0; return e.it.k === "M" ? "" : `<div class="rail"><button class="rb ${on ? "on" : ""}" data-fa="save" aria-label="Salvează">${on ? "❤️" : "🤍"}<small>Salvează</small></button></div>`; }
+function fdRail(e) { const on = fdState().saved.indexOf(e.it.id) >= 0; return e.it.k === "M" || e.it.k === "E" ? "" : `<div class="rail"><button class="rb ${on ? "on" : ""}" data-fa="save" aria-label="Salvează">${on ? "❤️" : "🤍"}<small>Salvează</small></button></div>`; }
 function fdTag(t) { return t ? `<span class="rtag">${TOPICS[t] || ""}</span>` : ""; }
 function fdFill(i) {
   const a = fdArt(i), e = FD.items[i]; if (!a || a.dataset.f) return;
@@ -95,7 +101,16 @@ function fdFill(i) {
   const it = e.it, col = FD_COLORS[i % FD_COLORS.length][1];
   a.style.setProperty("--rc", col);
   let h = "";
-  if (it.k === "L") {
+  if (it.k === "P") {
+    const ep = EPISODES[it.ep - 1], parts = STORY.filter(s => s.k === "P").length;
+    const head = `<div class="sth"><b>PART ${it.part}</b><span>din ${parts} · Episodul ${it.ep}: ${ep.title}</span></div>`;
+    const beats = `<div class="rbeats">${it.b.map(b => `<p class="bt">${fdMark(b)}</p>`).join("")}${it.v ? `<p class="bt sv">${it.v}</p>` : ""}${it.m ? `<p class="bt memo next">Part ${it.part + 1}: ${it.m}</p>` : ""}</div>`;
+    h = it.x ? `<div class="rq sx">${head}<h2 class="qtx">${it.h}</h2><div class="rx">${exhibit(it.x)}</div>${beats}</div>` : `<div class="rmid">${head}<h2 class="rhook">${it.h}</h2>${beats}</div><div class="swipe">⌃ swipe</div>`;
+  } else if (it.k === "K") {
+    h = `<div class="rq"><div class="sth"><b>VERIFICARE</b><span>Episodul ${it.ep}: ${EPISODES[it.ep - 1].title}</span></div><h2 class="qtx">${it.q}</h2>${e.opts.map((ai, n) => `<button class="ro" data-fa="q" data-v="${ai}"><b>${LET[n]}</b><span>${it.a[ai]}</span></button>`).join("")}<div class="fb"></div></div>`;
+  } else if (it.k === "E") {
+    h = `<div class="rmid"><p class="rkick">Finalul serialului</p><h2 class="rhook">Ai parcurs toată materia.</h2><p class="rsub">Acum încearcă o simulare sau recapitulează cu reels-urile din Mix.</p><a class="rcta" href="#simulare">Începe o simulare</a></div>`;
+  } else if (it.k === "L") {
     h = `<div class="rmid">${fdTag(it.t)}<h2 class="rhook">${it.h}</h2><div class="rbeats">${it.b.map(b => `<p class="bt">${fdMark(b)}</p>`).join("")}<p class="bt memo">${it.m}</p></div></div><div class="swipe">⌃ swipe</div>`;
   } else if (it.k === "C") {
     h = `<div class="rmid">${fdTag(it.t)}<p class="rkick">Știi asta?</p><h2 class="rhook">${it.f}</h2><div class="cback ${e.rev ? "on" : ""}">${it.b}</div>${e.rev ? fdCardBtns(e) : `<p class="rsub">Atinge ecranul pentru răspuns</p>`}</div>`;
@@ -114,13 +129,13 @@ function fdFill(i) {
   }
   a.innerHTML = h + fdRail(e);
   if (e.ans !== null) fdPaint(a, e);
-  if (it.k === "L" && e.rev) a.querySelectorAll(".bt").forEach(b => b.classList.add("on"));
+  if ((it.k === "L" || it.k === "P") && e.rev) a.querySelectorAll(".bt").forEach(b => b.classList.add("on"));
 }
 function fdCardBtns() { return `<div class="two"><button class="tf no" data-fa="card" data-v="0">Nu știam</button><button class="tf yes" data-fa="card" data-v="2">Știam</button></div>`; }
 function fdEvict() { document.querySelectorAll(".reel[data-f]").forEach(a => { if (Math.abs(+a.dataset.i - FD.cur) > 5) { a.innerHTML = ""; delete a.dataset.f; } }); }
 function fdPaint(a, e) {
   const it = e.it, fb = a.querySelector(".fb"), good = e.ok;
-  if (it.k === "Q") {
+  if (it.k === "Q" || it.k === "K") {
     a.querySelectorAll(".ro").forEach(b => { const v = +b.dataset.v; b.disabled = true; if (v === 0) b.classList.add("right"); else if (v === e.ans) b.classList.add("wrong"); });
   }
   if (fb) {
@@ -148,12 +163,13 @@ function fdSay(text, done) {
     FD.timer = setTimeout(fin, 2500 + text.length * 130);
     speechSynthesis.speak(u);
   } else {
-    FD.timer = setTimeout(fin, Math.max(1050, text.length * 46));
+    FD.timer = setTimeout(fin, FD.slow ? Math.max(1700, text.length * 72) : Math.max(1050, text.length * 46));
   }
 }
 function fdRun(i) {
   fdHalt();
-  const e = FD.items[i]; if (!e || e.it.k !== "L") return;
+  const e = FD.items[i]; if (!e || (e.it.k !== "L" && e.it.k !== "P")) return;
+  FD.slow = e.it.k === "P";
   const a = fdArt(i); if (!a) return;
   const bs = [...a.querySelectorAll(".bt")];
   if (e.rev) { bs.forEach(b => b.classList.add("on")); if (FD.voice) { fdSay(e.it.h, () => {}); } return; }
@@ -180,7 +196,8 @@ function fdActivate(i) {
   for (let j = i - 2; j <= i + 3; j++) if (FD.items[j]) fdFill(j);
   fdEvict();
   const e = FD.items[i], st = fdState();
-  if (e && e.it.k !== "M" && !e.counted) { e.counted = true; st.seen[e.it.id] = (st.seen[e.it.id] || 0) + 1; FD.seenThis++; if (e.it.k === "L") st.xp += 5; save(); }
+  if (e && e.it.idx !== undefined && e.it.idx >= (st.pos || 0)) { st.pos = e.it.idx; save(); }
+  if (e && e.it.k !== "M" && e.it.k !== "E" && !e.counted) { e.counted = true; st.seen[e.it.id] = (st.seen[e.it.id] || 0) + 1; FD.seenThis++; if (e.it.k === "L" || e.it.k === "P") st.xp += 5; save(); }
   document.querySelectorAll(".reel.now").forEach(a => a.classList.remove("now"));
   const a = fdArt(i); if (a) a.classList.add("now");
   fdHud(); fdBgFor(i); fdRun(i);
@@ -204,7 +221,7 @@ function fdAnswer(i, e, ans, good) {
   e.ans = ans; e.ok = good; e.word = good ? fdAny(FD_WIN) : fdAny(FD_LOSE);
   FD.tot++;
   if (good) { FD.ok++; st.combo++; st.best = Math.max(st.best, st.combo); st.xp += 100 + Math.min(st.combo, 10) * 20; }
-  else { st.combo = 0; st.xp = Math.max(0, st.xp - 25); FD.retry.push({ it: e.it, at: FD.items.length + 3 + Math.floor(Math.random() * 3) }); }
+  else { st.combo = 0; st.xp = Math.max(0, st.xp - 25); FD.retry.push({ it: e.it, at: FD.items.length + (e.it.k === "K" ? 0 : 3 + Math.floor(Math.random() * 3)) }); }
   if (e.it.k === "Q") record(e.it.id, good);
   save();
   fdPaint(a, e);
@@ -242,14 +259,14 @@ function fdClick(ev) {
   }
   if (ev.target.closest("a")) return;
   const t = Date.now();
-  if (t - FD.lastTap < 300 && e.it.k !== "M") {
+  if (t - FD.lastTap < 300 && e.it.k !== "M" && e.it.k !== "E") {
     const st = fdState();
     if (st.saved.indexOf(e.it.id) < 0) { st.saved.push(e.it.id); save(); const b = art.querySelector('[data-fa="save"]'); if (b) { b.classList.add("on"); b.innerHTML = "❤️<small>Salvează</small>"; } }
     const h = document.createElement("div"); h.className = "bigheart"; h.textContent = "❤️"; art.appendChild(h); setTimeout(() => h.remove(), 800);
     FD.lastTap = 0; return;
   }
   FD.lastTap = t;
-  if (e.it.k === "L") fdRevealAll(i);
+  if (e.it.k === "L" || e.it.k === "P") fdRevealAll(i);
   else if (e.it.k === "C" && !e.rev) {
     e.rev = true;
     art.querySelector(".cback").classList.add("on");
@@ -274,7 +291,7 @@ function fdBgFor(i) {
   const e = FD.items[i]; if (!e) return;
   FDB.col = FD_COLORS[i % FD_COLORS.length];
   FDB.mode = i % 3;
-  FDB.active = e.it.k === "L";
+  FDB.active = e.it.k === "L" || (e.it.k === "P" && !e.it.x);
   FDB.ball = null; FDB.trail = []; FDB.blocks = []; FDB.ob = []; FDB.pl.y = 0; FDB.pl.v = 0; FDB.pl.a = 0;
   FDB.c.classList.remove("show");
   if (!FDB.active) return;
@@ -345,17 +362,19 @@ function fdBgLoop(ts) {
 /* Filtre, voce, rutare */
 function fdReset() {
   fdHalt();
-  FD.items = []; FD.cur = -1; FD.pi = 0; FD.retry = []; FD.recent = [];
+  FD.items = []; FD.cur = -1; FD.pi = 0; FD.retry = []; FD.recent = []; FD.ended = false;
+  if (FD.filter === "story") FD.si = Math.min(fdState().pos || 0, STORY.length - 1);
   const box = fdEl("fdScroll"); FD.io.disconnect(); box.innerHTML = ""; box.scrollTop = 0;
   fdAppend(10);
   if (FD.items.length) fdActivate(0);
 }
 function fdSheet() {
   const box = fdEl("fdSheet"); box.hidden = !FD.sheet; if (!FD.sheet) return;
+  const st = fdState(), cur = STORY[Math.min(st.pos || 0, STORY.length - 1)];
   const chip = (v, l) => `<button class="sc ${FD.filter === v ? "on" : ""}" data-sv="${v}">${l}</button>`;
-  box.innerHTML = `<h3>Ce vrei să vezi?</h3><p class="rsub">Lecții văzute: ${REELS.filter(r => fdState().seen[r.id]).length}/${REELS.length}. Lecțiile nevăzute apar primele.</p><div class="scs">${chip("all", "🔥 Pentru tine")}${chip("saved", "❤️ Salvate")}${Object.keys(TOPICS).map(t => chip(t, TOPICS[t])).join("")}</div>`;
+  box.innerHTML = `<h3>Serialul, de la zero</h3><p class="rsub">Ai ajuns în Episodul ${cur.ep}. Atinge un episod ca să sari la el.</p><div class="scs">${chip("story", "▶ Continuă serialul")}<button class="sc" data-ep="0">↺ De la început</button></div><div class="scs">${EPISODES.map((x, i) => `<button class="sc ${cur.ep === x.n ? "cur" : ""}" data-ep="${i}">${x.n}. ${x.title}</button>`).join("")}</div><h3>Recapitulare</h3><p class="rsub">Lecții scurte amestecate, pentru când știi deja materia.</p><div class="scs">${chip("all", "🔀 Mix")}${chip("saved", "❤️ Salvate")}${Object.keys(TOPICS).map(t => chip(t, TOPICS[t])).join("")}</div>`;
 }
-function fdLabel() { fdEl("fdFilter").textContent = (FD.filter === "all" ? "Pentru tine" : FD.filter === "saved" ? "Salvate" : TOPICS[FD.filter]) + " ▾"; }
+function fdLabel() { fdEl("fdFilter").textContent = (FD.filter === "story" ? "Serial" : FD.filter === "all" ? "Mix" : FD.filter === "saved" ? "Salvate" : TOPICS[FD.filter]) + " ▾"; }
 function fdFindVoice() {
   if (!window.speechSynthesis) return null;
   const v = speechSynthesis.getVoices().filter(o => /^ro/i.test(o.lang));
@@ -372,7 +391,11 @@ function fdInit() {
   box.addEventListener("click", fdClick);
   box.addEventListener("scroll", () => { FD.lastScroll = performance.now(); }, { passive: true });
   fdEl("fdFilter").addEventListener("click", () => { FD.sheet = !FD.sheet; fdSheet(); });
-  fdEl("fdSheet").addEventListener("click", ev => { const b = ev.target.closest("[data-sv]"); if (!b) return; FD.filter = b.dataset.sv; FD.sheet = false; fdSheet(); fdLabel(); fdReset(); });
+  fdEl("fdSheet").addEventListener("click", ev => {
+    const ep = ev.target.closest("[data-ep]");
+    if (ep) { const st = fdState(); st.pos = EPISODES[+ep.dataset.ep].start; save(); FD.filter = "story"; FD.sheet = false; fdSheet(); fdLabel(); fdReset(); return; }
+    const b = ev.target.closest("[data-sv]"); if (!b) return; FD.filter = b.dataset.sv; FD.sheet = false; fdSheet(); fdLabel(); fdReset();
+  });
   fdEl("fdVoice").addEventListener("click", () => {
     if (!window.speechSynthesis) { fdToast("Telefonul nu are voce"); return; }
     if (FD.voice) { FD.voice = false; speechSynthesis.cancel(); fdEl("fdVoice").textContent = "🔇"; fmDuck(false); return; }
