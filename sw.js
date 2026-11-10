@@ -1,5 +1,5 @@
 // Păstrează aplicația disponibilă offline; când există internet, aduce versiunea nouă în fundal.
-const CACHE = "grila-mm-v2";
+const CACHE = "grila-mm-v3";
 const FILES = ["./", "index.html", "style.css", "app.js", "exhibits.js", "questions.js", "cards.js", "reels.js", "feed.js", "manifest.webmanifest", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(k => Promise.all(k.filter(n => n !== CACHE).map(n => caches.delete(n)))).then(() => self.clients.claim())); });

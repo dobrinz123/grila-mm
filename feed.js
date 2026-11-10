@@ -104,7 +104,7 @@ function fdFill(i) {
     const q = it.mode === "sem" ? "Semnificativ la 0,05?" : "Ce sens are relația?";
     const shown = it.mode === "sem" ? it.r.replace(/\*/g, "") : it.r;
     const btns = it.mode === "sem" ? `<button class="tf no" data-fa="s" data-v="0">NU</button><button class="tf yes" data-fa="s" data-v="1">DA</button>` : `<button class="tf no" data-fa="s" data-v="0">NEGATIV</button><button class="tf yes" data-fa="s" data-v="1">POZITIV</button>`;
-    h = `<div class="rmid">${fdTag("spss")}<p class="rkick">SPSS speedrun</p><div class="cell"><div class="cname">${it.a} <i>×</i> ${it.b}</div><div class="crow"><span>Pearson</span><b>${shown}</b></div><div class="crow"><span>Sig.</span><b>${it.sig}</b></div><div class="crow"><span>N</span><b>${it.n}</b></div></div><h2 class="rhook sm">${q}</h2><div class="two">${e.ans === null ? btns : ""}</div><div class="fb"></div></div>`;
+    h = `<div class="rmid">${fdTag("spss")}<p class="rkick">Citește celula SPSS</p><div class="cell"><div class="cname">${it.a} <i>×</i> ${it.b}</div><div class="crow"><span>Pearson</span><b>${shown}</b></div><div class="crow"><span>Sig.</span><b>${it.sig}</b></div><div class="crow"><span>N</span><b>${it.n}</b></div></div><h2 class="rhook sm">${q}</h2><div class="two">${e.ans === null ? btns : ""}</div><div class="fb"></div></div>`;
   } else if (it.k === "Q") {
     h = `<div class="rq">${fdTag(it.t)}${it.x ? `<div class="rx">${exhibit(it.x)}</div>` : ""}<h2 class="qtx">${it.q}</h2>${e.opts.map((ai, n) => `<button class="ro" data-fa="q" data-v="${ai}"><b>${LET[n]}</b><span>${it.a[ai]}</span></button>`).join("")}<div class="fb"></div></div>`;
   } else if (it.k === "M") {
