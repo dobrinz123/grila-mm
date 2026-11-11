@@ -167,6 +167,7 @@ function viewHome() {
     </div>
     <a class="big" href="#simulare">${S.ex ? "Continuă simularea începută" : "Simulare: 30 de întrebări, 30 de minute"}</a>
   </section>
+  <button class="big" data-go="grile" data-mode="tabele">📊 Antrenament nelimitat: tabele și grafice</button>
   ${weak}
   <div class="row"><a class="btn grow" href="#flash" style="text-align:center;text-decoration:none;color:inherit">Flashcarduri</a><a class="btn grow" href="#grile" style="text-align:center;text-decoration:none;color:inherit">Grile pe capitole</a></div>
   ${installBox()}
@@ -222,6 +223,7 @@ function rateCard(v) {
 /* Grile pe capitole */
 let P = { t: "toate", mode: "tot", queue: null, cur: null, ans: null, ok: 0, n: 0 };
 function buildPractice() {
+  if (P.mode === "tabele") { P.queue = []; P.ok = 0; P.n = 0; nextPractice(); return; }
   let l = Q.filter(o => P.t === "toate" ? true : o.t === P.t);
   if (P.mode === "gresite") l = l.filter(o => S.q[o.id] && !S.q[o.id].c);
   if (P.mode === "noi") l = l.filter(o => !S.q[o.id]);
@@ -229,7 +231,12 @@ function buildPractice() {
   P.queue = shuffle(l).sort((a, b) => rank(a) - rank(b)).map(o => o.id);
   P.ok = 0; P.n = 0; nextPractice();
 }
-function nextPractice() { P.ans = null; const id = P.queue.shift(); P.cur = id ? { id, o: orderFor(QM[id]) } : null; }
+function nextPractice() {
+  P.ans = null;
+  let id = P.queue.shift();
+  if (!id && P.mode === "tabele") { const it = drillMake(P.t === "toate" ? null : P.t); id = it ? it.id : null; }
+  P.cur = id ? { id, o: orderFor(QM[id]) } : null;
+}
 function orderFor(q) { return q.x === "panels" ? [0, 1, 2, 3].sort((a, b) => q.a[a] < q.a[b] ? -1 : 1) : shuffle([0, 1, 2, 3]); }
 function optsHTML(q, order, chosen, reveal, act) {
   return `<div class="opts">${order.map((ai, i) => {
@@ -241,7 +248,7 @@ function optsHTML(q, order, chosen, reveal, act) {
 }
 function viewPractice() {
   if (!P.queue) buildPractice();
-  const modes = [["tot", "Toate"], ["noi", "Nevăzute"], ["gresite", "Greșite"]];
+  const modes = [["tabele", "📊 Tabele și grafice ∞"], ["tot", "Toate"], ["noi", "Nevăzute"], ["gresite", "Greșite"]];
   const head = `<h1>Grile</h1>${chips(P.t, "p-topic")}<div class="chips">${modes.map(m => `<button class="chip ${P.mode === m[0] ? "on" : ""}" data-act="p-mode" data-v="${m[0]}">${m[1]}</button>`).join("")}</div>`;
   if (!P.cur) {
     const msg = P.n ? `Ai răspuns corect la ${P.ok} din ${P.n}.` : P.mode === "gresite" ? "Nu ai nicio întrebare greșită aici." : "Nu mai sunt întrebări nevăzute aici.";
@@ -250,15 +257,31 @@ function viewPractice() {
   }
   const q = QM[P.cur.id], done = P.ans !== null;
   app.innerHTML = `${head}
-  <div class="qmeta"><span>${TOPICS[q.t]} · mai sunt ${P.queue.length + 1}</span><span>${P.n ? `${P.ok}/${P.n} corecte` : ""}</span></div>
+  <div class="qmeta"><span>${TOPICS[q.t]} · ${P.mode === "tabele" ? "exercițiu nou, generat" : "mai sunt " + (P.queue.length + 1)}</span><span>${P.n ? `${P.ok}/${P.n} corecte` : ""}</span></div>
   ${q.x ? exhibit(q.x) : ""}
   <p class="qt">${q.q}</p>
   ${optsHTML(q, P.cur.o, P.ans, done, "p-ans")}
   ${done ? `<div class="ex ${P.ans === 0 ? "ok" : "no"}"><b>${P.ans === 0 ? "Corect" : "Greșit"}</b><p>${q.e}</p><p class="mute">Sursa: ${q.s}</p></div><button class="btn pri" data-act="p-next">Următoarea întrebare</button>` : ""}`;
 }
-function record(id, ok) { const r = S.q[id] || { n: 0 }; r.n++; r.c = ok ? 1 : 0; S.q[id] = r; }
+function record(id, ok) { if (String(id).startsWith("D-")) return; const r = S.q[id] || { n: 0 }; r.n++; r.c = ok ? 1 : 0; S.q[id] = r; }
 
 /* Simulare */
+// Format examen: 20 de întrebări pe tabele și grafice (12 din bancă, 8 generate) și 10 de concepte.
+function makeExamData() {
+  const seen = o => (S.q[o.id] || { n: 0 }).n;
+  const ex = shuffle(Q.filter(o => o.x && (S.c1 || o.t !== "c1"))).sort((a, b) => seen(a) - seen(b));
+  const ids = [], usedX = {};
+  for (const o of ex) { if (ids.length >= 12) break; if ((usedX[o.x] || 0) >= 1) continue; usedX[o.x] = 1; ids.push(o.id); }
+  const gen = {}, kinds = ["spss", "spss", "spss", "gra", "gra", "cor", "fac", "clu", "reg"];
+  for (const k of shuffle(kinds).slice(0, 8)) { const it = drillMake(k); if (it) { ids.push(it.id); gen[it.id] = drillSnapshot(it.id); } }
+  const bp = { mas: 2, dist: 1, cor: 1, err: 2, esa: 2, fac: 1, ret: 1 };
+  if (S.c1) { bp.c1 = 1; bp.ret = 0; }
+  Object.keys(bp).forEach(t => {
+    const pool = shuffle(Q.filter(o => o.t === t && !o.x)).sort((a, b) => seen(a) - seen(b));
+    pool.slice(0, bp[t]).forEach(o => ids.push(o.id));
+  });
+  return { items: shuffle(ids).map(id => ({ id, o: orderFor(QM[id]), a: null, f: false })), gen };
+}
 function makeExam() {
   const bp = Object.assign({}, BLUEPRINT);
   if (!S.c1) { delete bp.c1; bp.spss += 1; }
@@ -285,6 +308,7 @@ function viewExamStart() {
     <p>Întrebările sunt amestecate după capitole, cu accent pe tabele SPSS, corelație, semnificație și grafice. Vezi răspunsurile doar la final. Prioritate au întrebările pe care le-ai văzut mai rar.</p>
     <label class="toggle" for="c1"><input id="c1" type="checkbox" ${S.c1 ? "checked" : ""} data-act="toggle-c1"><span>Include și Cursul 1. Fișa de notare trece grila doar pe cursurile 2, 4, 5 și 6.</span></label>
     <p class="mute">Cursul 3 (Cauzalitate) nu apare. Am presupus câte un singur răspuns corect pe întrebare.</p>
+    <label class="toggle" for="fmt"><input id="fmt" type="checkbox" ${S.fmt !== false ? "checked" : ""} data-act="toggle-fmt"><span>Format examen: aproximativ două treimi întrebări pe tabele și grafice, inclusiv tabele noi, generate.</span></label>
     <button class="big" data-act="ex-start">Începe simularea</button>
   </section>
   ${S.last ? `<button class="btn" data-act="ex-review">Vezi corectura ultimei simulări</button>` : ""}
@@ -308,7 +332,7 @@ function viewExam() {
 function finishExam() {
   const E = S.ex; let s = 0; const by = {};
   E.items.forEach(x => { const q = QM[x.id], ok = x.a === 0; if (ok) s++; if (x.a !== null) record(x.id, ok); else record(x.id, false); by[q.t] = by[q.t] || [0, 0]; by[q.t][1]++; if (ok) by[q.t][0]++; });
-  S.last = { items: E.items, s, by, d: Date.now(), sec: Math.min(EXAM_SEC, Math.floor((Date.now() - E.start) / 1000)) };
+  S.last = { items: E.items, gen: E.gen || {}, s, by, d: Date.now(), sec: Math.min(EXAM_SEC, Math.floor((Date.now() - E.start) / 1000)) };
   S.hist.push({ s, d: Date.now() });
   S.ex = null; review = true; confirmEnd = false; showGrid = false; save(); render(); window.scrollTo(0, 0);
 }
@@ -345,9 +369,10 @@ function render() {
 function toTop() { window.scrollTo(0, 0); }
 app.addEventListener("click", ev => {
   const el = ev.target.closest("[data-act],[data-go]"); if (!el) return;
-  if (el.dataset.go) { P.t = el.dataset.topic || "toate"; P.mode = "tot"; P.queue = null; location.hash = el.dataset.go; if (route() === el.dataset.go) render(); return; }
+  if (el.dataset.go) { P.t = el.dataset.topic || "toate"; P.mode = el.dataset.mode || "tot"; P.queue = null; location.hash = el.dataset.go; if (route() === el.dataset.go) render(); return; }
   const a = el.dataset.act, v = el.dataset.v, E = S.ex;
   if (a === "toggle-c1") { S.c1 = el.checked; save(); return; }
+  if (a === "toggle-fmt") { S.fmt = el.checked; save(); return; }
   if (a === "noop") return;
   if (a === "install" && deferredInstall) { deferredInstall.prompt(); deferredInstall = null; render(); return; }
   if (a === "fc-topic") { F.t = v; F.queue = null; }
@@ -365,7 +390,7 @@ app.addEventListener("click", ev => {
     save();
   }
   else if (a === "p-next") { nextPractice(); render(); toTop(); return; }
-  else if (a === "ex-start") { const items = makeExam(); S.ex = { items, i: 0, start: Date.now() }; review = false; save(); render(); toTop(); startTick(); return; }
+  else if (a === "ex-start") { let items, gen = {}; if (S.fmt !== false) { const d = makeExamData(); items = d.items; gen = d.gen; } else items = makeExam(); S.ex = { items, gen, i: 0, start: Date.now() }; review = false; save(); render(); toTop(); startTick(); return; }
   else if (a === "ex-ans") { const it = E.items[E.i], n = +v; it.a = it.a === n ? null : n; save(); }
   else if (a === "ex-next") { E.i = Math.min(29, E.i + 1); confirmEnd = false; save(); render(); toTop(); return; }
   else if (a === "ex-prev") { E.i = Math.max(0, E.i - 1); confirmEnd = false; save(); render(); toTop(); return; }
@@ -394,6 +419,7 @@ function startTick() {
   }, 1000);
 }
 window.addEventListener("hashchange", () => { render(); toTop(); });
+drillRestore(S.ex && S.ex.gen); drillRestore(S.last && S.last.gen);
 if (S.ex) { if (timeLeft() <= 0) finishExam(); else startTick(); }
 render();
 connectSync();

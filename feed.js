@@ -58,6 +58,7 @@ function fdNext() {
   const n = FD.items.length;
   const due = FD.retry.findIndex(r => r.at <= n);
   if (due >= 0) return FD.retry.splice(due, 1)[0].it;
+  if (FD.filter === "tabele") { const it = drillMake(); return it ? Object.assign({ k: "Q" }, it) : null; }
   if (FD.filter === "story") {
     if (FD.si < STORY.length) return STORY[FD.si++];
     if (!FD.ended) { FD.ended = true; return { k: "E", id: "END", t: "" }; }
@@ -476,9 +477,9 @@ function fdSheet() {
   const box = fdEl("fdSheet"); box.hidden = !FD.sheet; if (!FD.sheet) return;
   const st = fdState(), cur = STORY[Math.min(st.pos || 0, STORY.length - 1)];
   const chip = (v, l) => `<button class="sc ${FD.filter === v ? "on" : ""}" data-sv="${v}">${l}</button>`;
-  box.innerHTML = `<h3>Serialul, de la zero</h3><p class="rsub">Ai ajuns în Episodul ${cur.ep}. Atinge un episod ca să sari la el.</p><div class="scs">${chip("story", "▶ Continuă serialul")}<button class="sc" data-ep="0">↺ De la început</button></div><div class="scs">${EPISODES.map((x, i) => `<button class="sc ${cur.ep === x.n ? "cur" : ""}" data-ep="${i}">${x.n}. ${x.title}</button>`).join("")}</div><h3>Recapitulare</h3><p class="rsub">Lecții scurte amestecate, pentru când știi deja materia.</p><div class="scs">${chip("all", "🔀 Mix")}${chip("saved", "❤️ Salvate")}${Object.keys(TOPICS).map(t => chip(t, TOPICS[t])).join("")}</div>`;
+  box.innerHTML = `<h3>Pentru examen</h3><p class="rsub">Tabele și grafice noi la fiecare swipe, cu răspunsul calculat din date.</p><div class="scs">${chip("tabele", "📊 Tabele și grafice ∞")}</div><h3>Serialul, de la zero</h3><p class="rsub">Ai ajuns în Episodul ${cur.ep}. Atinge un episod ca să sari la el.</p><div class="scs">${chip("story", "▶ Continuă serialul")}<button class="sc" data-ep="0">↺ De la început</button></div><div class="scs">${EPISODES.map((x, i) => `<button class="sc ${cur.ep === x.n ? "cur" : ""}" data-ep="${i}">${x.n}. ${x.title}</button>`).join("")}</div><h3>Recapitulare</h3><p class="rsub">Lecții scurte amestecate, pentru când știi deja materia.</p><div class="scs">${chip("all", "🔀 Mix")}${chip("saved", "❤️ Salvate")}${Object.keys(TOPICS).map(t => chip(t, TOPICS[t])).join("")}</div>`;
 }
-function fdLabel() { fdEl("fdFilter").textContent = (FD.filter === "story" ? "Serial" : FD.filter === "all" ? "Mix" : FD.filter === "saved" ? "Salvate" : TOPICS[FD.filter]) + " ▾"; }
+function fdLabel() { fdEl("fdFilter").textContent = (FD.filter === "tabele" ? "Tabele" : FD.filter === "story" ? "Serial" : FD.filter === "all" ? "Mix" : FD.filter === "saved" ? "Salvate" : TOPICS[FD.filter]) + " ▾"; }
 function fdInit() {
   if (FD.ready) return; FD.ready = true;
   fdBuild();
