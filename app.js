@@ -311,6 +311,7 @@ function viewExamStart() {
     <label class="toggle" for="fmt"><input id="fmt" type="checkbox" ${S.fmt !== false ? "checked" : ""} data-act="toggle-fmt"><span>Format examen: aproximativ două treimi întrebări pe tabele și grafice, inclusiv tabele noi, generate.</span></label>
     <button class="big" data-act="ex-start">Începe simularea</button>
     <button class="btn pri" data-act="ex-curs">Test în formatul din curs: tabele, matrici, grafice</button>
+    <button class="btn pri" data-act="ex-greu">Test greu: capcanele din curs (30 de întrebări)</button>
   </section>
   ${S.last ? `<button class="btn" data-act="ex-review">Vezi corectura ultimei simulări</button>` : ""}
   ${hist ? `<section class="panel"><h2>Ultimele simulări</h2>${hist}</section>` : ""}`;
@@ -391,6 +392,10 @@ app.addEventListener("click", ev => {
     save();
   }
   else if (a === "p-next") { nextPractice(); render(); toTop(); return; }
+  else if (a === "ex-greu") {
+    S.ex = { items: shuffle(HC_IDS).map(id => ({ id, o: orderFor(QM[id]), a: null, f: false })), gen: {}, i: 0, start: Date.now() };
+    review = false; save(); render(); toTop(); startTick(); return;
+  }
   else if (a === "ex-curs") {
     const extra = Q.filter(o => o.x === "panels").slice(0, 2).concat(Q.filter(o => o.x === "fig20").slice(0, 3), Q.filter(o => o.x === "prac").slice(0, 2));
     const ids = TC_IDS.concat(extra.map(o => o.id)).slice(0, 30);
