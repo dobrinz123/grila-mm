@@ -310,6 +310,7 @@ function viewExamStart() {
     <p class="mute">Cursul 3 (Cauzalitate) nu apare. Am presupus câte un singur răspuns corect pe întrebare.</p>
     <label class="toggle" for="fmt"><input id="fmt" type="checkbox" ${S.fmt !== false ? "checked" : ""} data-act="toggle-fmt"><span>Format examen: aproximativ două treimi întrebări pe tabele și grafice, inclusiv tabele noi, generate.</span></label>
     <button class="big" data-act="ex-start">Începe simularea</button>
+    <button class="btn pri" data-act="ex-curs">Test în formatul din curs: tabele, matrici, grafice</button>
   </section>
   ${S.last ? `<button class="btn" data-act="ex-review">Vezi corectura ultimei simulări</button>` : ""}
   ${hist ? `<section class="panel"><h2>Ultimele simulări</h2>${hist}</section>` : ""}`;
@@ -390,6 +391,12 @@ app.addEventListener("click", ev => {
     save();
   }
   else if (a === "p-next") { nextPractice(); render(); toTop(); return; }
+  else if (a === "ex-curs") {
+    const extra = Q.filter(o => o.x === "panels").slice(0, 2).concat(Q.filter(o => o.x === "fig20").slice(0, 3), Q.filter(o => o.x === "prac").slice(0, 2));
+    const ids = TC_IDS.concat(extra.map(o => o.id)).slice(0, 30);
+    S.ex = { items: shuffle(ids).map(id => ({ id, o: orderFor(QM[id]), a: null, f: false })), gen: {}, i: 0, start: Date.now() };
+    review = false; save(); render(); toTop(); startTick(); return;
+  }
   else if (a === "ex-start") { let items, gen = {}; if (S.fmt !== false) { const d = makeExamData(); items = d.items; gen = d.gen; } else items = makeExam(); S.ex = { items, gen, i: 0, start: Date.now() }; review = false; save(); render(); toTop(); startTick(); return; }
   else if (a === "ex-ans") { const it = E.items[E.i], n = +v; it.a = it.a === n ? null : n; save(); }
   else if (a === "ex-next") { E.i = Math.min(29, E.i + 1); confirmEnd = false; save(); render(); toTop(); return; }
